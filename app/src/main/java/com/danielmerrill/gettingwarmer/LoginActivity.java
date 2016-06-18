@@ -20,9 +20,7 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-/**
- * Created by danielmerrill on 6/16/16.
- */
+
 public class LoginActivity extends AppCompatActivity {
 
     EditText username,pass;

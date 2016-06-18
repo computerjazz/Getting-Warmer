@@ -5,9 +5,7 @@ import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
 
-/**
- * Created by danielmerrill on 6/16/16.
- */
+
 
 
 public interface RestInterface {
@@ -19,16 +17,40 @@ public interface RestInterface {
     @FormUrlEncoded
     @POST("/login")
     void Login(@Field("username") String username,
-               @Field("pass") String pass, Callback<LoginModel> cb);
+               @Field("pass") String pass,
+               Callback<LoginModel> cb);
 
     @FormUrlEncoded
     @POST("/signup")
     void SignUp(@Field("username") String username,
-                @Field("pass") String pass, Callback<LoginModel> pm);
+                @Field("pass") String pass,
+                Callback<LoginModel> pm);
 
     @FormUrlEncoded
     @POST("/addfriend")
     void addFriend(@Field("username") String username,
-                @Field("friendUsername") String friendUsername, Callback<LoginModel> pm);
+                   @Field("friendUsername") String friendUsername,
+                   Callback<LoginModel> pm);
+
+    @FormUrlEncoded
+    @POST("/getfriends")
+    void getFriends(@Field("username") String username,
+                    Callback<LoginModel> cb);
+
+    @FormUrlEncoded
+    @POST("/getlocation")
+    void getLocation(@Field("username") String username,
+                     @Field("friendUsername") String friendUsername,
+                     Callback<LoginModel> pm);
+
+    @FormUrlEncoded
+    @POST("/setlocation")
+    void setLocation(@Field("username") String username,
+                     @Field("friendUsername") String friendUsername,
+                     @Field("latitude_target") String latitude_target,
+                     @Field("longitude_target") String longitude_target,
+                     @Field("latitude_start") String latitude_start,
+                     @Field("longitude_start") String longitude_start,
+                     Callback<LoginModel> pm);
 
 }

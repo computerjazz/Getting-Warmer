@@ -4,55 +4,164 @@ package com.danielmerrill.gettingwarmer;
  * Created by danielmerrill on 6/16/16.
  */
 
-    //import javax.annotation.Generated;
-    import com.google.gson.annotations.Expose;
-    import com.google.gson.annotations.SerializedName;
 
-    //@Generated("org.jsonschema2pojo")
-    public class LoginModel {
 
-        @SerializedName("status")
-        @Expose
-        private String status;
-        @SerializedName("login")
-        @Expose
-        private String login;
 
-        /**
-         *
-         * @return
-         * The status
-         */
-        public String getStatus() {
-            return status;
-        }
+        import java.util.ArrayList;
+        import java.util.List;
+        //import javax.annotation.Generated;
+        import com.google.gson.annotations.Expose;
+        import com.google.gson.annotations.SerializedName;
 
-        /**
-         *
-         * @param status
-         * The status
-         */
-        public void setStatus(String status) {
-            this.status = status;
-        }
+//@Generated("org.jsonschema2pojo")
+public class LoginModel {
 
-        /**
-         *
-         * @return
-         * The login
-         */
-        public String getLogin() {
-            return login;
-        }
+    @SerializedName("status")
+    @Expose
+    private String status;
+    @SerializedName("login")
+    @Expose
+    private String login;
+    @SerializedName("latitude_target")
+    @Expose
+    private String latitudeTarget;
+    @SerializedName("longitude_target")
+    @Expose
+    private String longitudeTarget;
+    @SerializedName("latitude_start")
+    @Expose
+    private String latitudeStart;
+    @SerializedName("longitude_start")
+    @Expose
+    private String longitudeStart;
+    @SerializedName("friends")
+    @Expose
+    private List<String> friends = new ArrayList<String>();
 
-        /**
-         *
-         * @param login
-         * The login
-         */
-        public void setLogin(String login) {
-            this.login = login;
-        }
-
+    /**
+     *
+     * @return
+     * The status
+     */
+    public String getStatus() {
+        return status;
     }
 
+    /**
+     *
+     * @param status
+     * The status
+     */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    /**
+     *
+     * @return
+     * The login
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     *
+     * @param login
+     * The login
+     */
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    /**
+     *
+     * @return
+     * The latitudeTarget
+     */
+    public String getLatitudeTarget() {
+        return latitudeTarget;
+    }
+
+    /**
+     *
+     * @param latitudeTarget
+     * The latitude_target
+     */
+    public void setLatitudeTarget(String latitudeTarget) {
+        this.latitudeTarget = latitudeTarget;
+    }
+
+    /**
+     *
+     * @return
+     * The longitudeTarget
+     */
+    public String getLongitudeTarget() {
+        return longitudeTarget;
+    }
+
+    /**
+     *
+     * @param longitudeTarget
+     * The longitude_target
+     */
+    public void setLongitudeTarget(String longitudeTarget) {
+        this.longitudeTarget = longitudeTarget;
+    }
+
+    /**
+     *
+     * @return
+     * The latitudeStart
+     */
+    public String getLatitudeStart() {
+        return latitudeStart;
+    }
+
+    /**
+     *
+     * @param latitudeStart
+     * The latitude_start
+     */
+    public void setLatitudeStart(String latitudeStart) {
+        this.latitudeStart = latitudeStart;
+    }
+
+    /**
+     *
+     * @return
+     * The longitudeStart
+     */
+    public String getLongitudeStart() {
+        return longitudeStart;
+    }
+
+    /**
+     *
+     * @param longitudeStart
+     * The longitude_start
+     */
+    public void setLongitudeStart(String longitudeStart) {
+        this.longitudeStart = longitudeStart;
+    }
+
+    /**
+     *
+     * @return
+     * The friends
+     */
+    public List<String> getFriends() {
+        return friends;
+    }
+
+    /**
+     *
+     * @param friends
+     * The friends
+     */
+    public void setFriends(List<String> friends) {
+        this.friends = friends;
+    }
+
+}
