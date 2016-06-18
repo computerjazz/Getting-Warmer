@@ -1,4 +1,4 @@
-package com.danielmerrill.login;
+package com.danielmerrill.gettingwarmer;
 
 import retrofit.Callback;
 import retrofit.http.Field;
@@ -18,12 +18,17 @@ public interface RestInterface {
 
     @FormUrlEncoded
     @POST("/login")
-    void Login(@Field("email") String email,
+    void Login(@Field("username") String username,
                @Field("pass") String pass, Callback<LoginModel> cb);
 
     @FormUrlEncoded
     @POST("/signup")
-    void SignUp(@Field("name") String name, @Field("email") String email,
+    void SignUp(@Field("username") String username,
                 @Field("pass") String pass, Callback<LoginModel> pm);
+
+    @FormUrlEncoded
+    @POST("/addfriend")
+    void addFriend(@Field("username") String username,
+                @Field("friendUsername") String friendUsername, Callback<LoginModel> pm);
 
 }

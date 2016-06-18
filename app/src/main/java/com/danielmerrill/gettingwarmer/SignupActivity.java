@@ -1,14 +1,18 @@
-package com.danielmerrill.login;
+package com.danielmerrill.gettingwarmer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -20,18 +24,17 @@ import retrofit.client.Response;
 /**
  * Created by danielmerrill on 6/16/16.
  */
-public class SignupActivity extends ActionBarActivity {
+public class SignupActivity extends AppCompatActivity {
 
-    EditText email,pass,name;
+    EditText pass,username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        email=(EditText)findViewById(R.id.input_email);
         pass=(EditText)findViewById(R.id.input_password);
-        name=(EditText)findViewById(R.id.input_name);
+        username=(EditText)findViewById(R.id.input_username);
 
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -49,7 +52,7 @@ public class SignupActivity extends ActionBarActivity {
         //calling field validation method
         if(CheckFieldValidation()) {
 
-            setContentView(R.layout.progressbar_layout);
+            //setContentView(R.layout.progressbar_layout);
             //making object of RestAdapter
             RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
 
@@ -57,29 +60,37 @@ public class SignupActivity extends ActionBarActivity {
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
             //Calling method to signup
-            restInterface.SignUp(name.getText().toString(), email.getText().toString(),
-                    pass.getText().toString(), new Callback<LoginModel>() {
+            restInterface.SignUp(username.getText().toString(), pass.getText().toString(), new Callback<LoginModel>() {
+
+
                         @Override
                         public void success(LoginModel model, Response response) {
 
-                            finish();
-                            startActivity(getIntent());
+                            //finish();
+                            //startActivity(getIntent());
 
-                            email.setText("");
-                            pass.setText("");
-                            name.setText("");
+                            String user = username.getText().toString();
+                            //pass.setText("");
+                            //username.setText("");
 
 
                             if (model.getStatus().equals("1")) {  //Signup Success
 
                                 Toast.makeText(SignupActivity.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
                                 finish();
-                                Intent i = new Intent(SignupActivity.this, LoginActivity.class);
+                                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putString("username", user);
+                                editor.commit();
+
+                                Intent i = new Intent(SignupActivity.this, Homepage.class);
                                 startActivity(i);
 
                             } else if (model.getStatus().equals("0"))  // Signup failure
                             {
-                                Toast.makeText(SignupActivity.this, "Email Already Registered", Toast.LENGTH_SHORT).show();
+                                Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
+                                username.startAnimation(shake);
+                                Toast.makeText(SignupActivity.this, "Username Already Registered", Toast.LENGTH_SHORT).show();
                             }
 
 
@@ -87,8 +98,8 @@ public class SignupActivity extends ActionBarActivity {
 
                         @Override
                         public void failure(RetrofitError error) {
-                            finish();
-                            startActivity(getIntent());
+                            //finish();
+                            //startActivity(getIntent());
                             String merror = error.getMessage();
                             Toast.makeText(SignupActivity.this, merror, Toast.LENGTH_LONG).show();
                         }
@@ -101,11 +112,8 @@ public class SignupActivity extends ActionBarActivity {
     private boolean CheckFieldValidation(){
 
         boolean valid=true;
-        if(name.getText().toString().equals("")){
-            name.setError("Can't be Empty");
-            valid=false;
-        }else if(email.getText().toString().equals("")){
-            email.setError("Can't be Empty");
+        if(username.getText().toString().equals("")){
+            username.setError("Can't be Empty");
             valid=false;
         }else if(pass.getText().toString().equals("")){
             pass.setError("Can't be Empty");

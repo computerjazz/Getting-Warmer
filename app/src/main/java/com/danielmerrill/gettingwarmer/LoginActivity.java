@@ -1,13 +1,17 @@
-package com.danielmerrill.login;
+package com.danielmerrill.gettingwarmer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -19,16 +23,16 @@ import retrofit.client.Response;
 /**
  * Created by danielmerrill on 6/16/16.
  */
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends AppCompatActivity {
 
-    EditText email,pass;
+    EditText username,pass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        email=(EditText)findViewById(R.id.input_email);
+        username=(EditText)findViewById(R.id.input_username);
         pass=(EditText)findViewById(R.id.input_password);
 
 
@@ -49,7 +53,7 @@ public class LoginActivity extends ActionBarActivity {
         if(CheckFieldValidation()) {
 
             //progressBar.setVisibility(View.VISIBLE);
-            setContentView(R.layout.progressbar_layout);
+            //setContentView(R.layout.progressbar_layout);
             //making object of RestAdapter
             RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
 
@@ -57,26 +61,32 @@ public class LoginActivity extends ActionBarActivity {
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
             //Calling method to get check login
-            restInterface.Login(email.getText().toString(), pass.getText().toString(), new Callback<LoginModel>() {
+            restInterface.Login(username.getText().toString(), pass.getText().toString(), new Callback<LoginModel>() {
                 @Override
                 public void success(LoginModel model, Response response) {
+                    String user = username.getText().toString();
+                    //startActivity(getIntent());
 
-                    finish();
-                    startActivity(getIntent());
-
-                    email.setText("");
-                    pass.setText("");
+                    //username.setText("");
+                   // pass.setText("");
 
 
                     if (model.getStatus().equals("1")) {  //login Success
-
-                        Toast.makeText(LoginActivity.this, "Logged In SuccessFully", Toast.LENGTH_SHORT).show();
+                        finish();
+                        //Toast.makeText(LoginActivity.this, "Logged In SuccessFully", Toast.LENGTH_SHORT).show();
                         // do something after logIn
-                        //Intent i = new Intent(LoginActivity.this,AfterLoginActivity.class);
-                        //startActivity(i);
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("username", user);
+                        editor.commit();
+                        //Toast.makeText(LoginActivity.this, prefs.getString("username", ""), Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent(LoginActivity.this, Homepage.class);
+                        startActivity(i);
 
                     } else if (model.getStatus().equals("0"))  // login failure
                     {
+                        Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
+                        username.startAnimation(shake);
                         Toast.makeText(LoginActivity.this, "Invalid UserName or Password ", Toast.LENGTH_SHORT).show();
                     }
 
@@ -85,8 +95,8 @@ public class LoginActivity extends ActionBarActivity {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    finish();
-                    startActivity(getIntent());
+                    //finish();
+                    //startActivity(getIntent());
                     String merror = error.getMessage();
                     Toast.makeText(LoginActivity.this, merror, Toast.LENGTH_LONG).show();
                 }
@@ -107,8 +117,8 @@ public class LoginActivity extends ActionBarActivity {
     private boolean CheckFieldValidation(){
 
         boolean valid=true;
-        if(email.getText().toString().equals("")){
-            email.setError("Can't be Empty");
+        if(username.getText().toString().equals("")){
+            username.setError("Can't be Empty");
             valid=false;
         }else if(pass.getText().toString().equals("")){
             pass.setError("Can't be Empty");
