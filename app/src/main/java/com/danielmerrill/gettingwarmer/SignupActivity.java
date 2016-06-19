@@ -45,6 +45,13 @@ public class SignupActivity extends AppCompatActivity {
 
     }
 
+    public void toLoginScreen(View v) {
+
+        Intent i = new Intent(SignupActivity.this,LoginActivity.class);
+        startActivity(i);
+        finish();
+    }
+
 
     public void Signup(View v){
 

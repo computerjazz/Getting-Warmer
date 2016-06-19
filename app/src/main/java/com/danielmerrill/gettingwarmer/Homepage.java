@@ -1,5 +1,6 @@
 package com.danielmerrill.gettingwarmer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -92,6 +94,11 @@ public class Homepage extends AppCompatActivity {
                     if (model.getStatus().equals("1")) {  //AddFriend Success
                         refreshFriendsList();
                         Toast.makeText(Homepage.this, "Added " + friendUserName + " to friends", Toast.LENGTH_SHORT).show();
+                        friendUserName_input.setText("");
+
+                        // hide keyboard
+                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
 
                     } else if (model.getStatus().equals("0"))  // Friend add failure
@@ -171,6 +178,7 @@ public class Homepage extends AppCompatActivity {
         // This is the array adapter, it takes the context of the activity as a
         // first parameter, the type of list view as a second parameter and your
         // array as a third parameter.
+        java.util.Collections.sort(fl);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_1,

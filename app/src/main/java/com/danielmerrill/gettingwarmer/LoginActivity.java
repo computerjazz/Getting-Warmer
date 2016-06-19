@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
                     if (model.getStatus().equals("1")) {  //login Success
-                        finish();
+
                         //Toast.makeText(LoginActivity.this, "Logged In SuccessFully", Toast.LENGTH_SHORT).show();
                         // do something after logIn
                         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -80,6 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                         //Toast.makeText(LoginActivity.this, prefs.getString("username", ""), Toast.LENGTH_SHORT).show();
                         Intent i = new Intent(LoginActivity.this, Homepage.class);
                         startActivity(i);
+                        finish();
 
                     } else if (model.getStatus().equals("0"))  // login failure
                     {
@@ -107,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Intent i = new Intent(LoginActivity.this,SignupActivity.class);
         startActivity(i);
+        finish();
 
 
     }

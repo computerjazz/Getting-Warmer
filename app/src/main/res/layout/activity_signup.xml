@@ -84,7 +84,23 @@
             android:padding="12dp"
             android:gravity="center_vertical|center_horizontal"
             android:layout_gravity="center"
+            android:textAllCaps="true"
             android:text="Sign up"/>
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_tologin"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:textColor="#C62828"
+            android:textStyle="bold"
+            android:onClick="toLoginScreen"
+            android:layout_marginBottom="24dp"
+            android:padding="12dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_gravity="center"
+            android:textAllCaps="true"
+            android:text="Back to login"/>
 
     </LinearLayout>
 </ScrollView>
