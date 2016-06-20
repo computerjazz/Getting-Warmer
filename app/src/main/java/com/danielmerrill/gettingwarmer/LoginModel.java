@@ -37,6 +37,9 @@ public class LoginModel {
     @SerializedName("friends")
     @Expose
     private List<String> friends = new ArrayList<String>();
+    @SerializedName("requests")
+    @Expose
+    private List<String> requests = new ArrayList<String>();
 
     /**
      *
@@ -162,6 +165,24 @@ public class LoginModel {
      */
     public void setFriends(List<String> friends) {
         this.friends = friends;
+    }
+
+    /**
+     *
+     * @return
+     * The requests
+     */
+    public List<String> getRequests() {
+        return requests;
+    }
+
+    /**
+     *
+     * @param requests
+     * The requests
+     */
+    public void setRequests(List<String> requests) {
+        this.requests = requests;
     }
 
 }

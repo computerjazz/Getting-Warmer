@@ -89,7 +89,7 @@
             android:background="#0d42c6"
             android:textColor="#ffffff"
             android:textStyle="bold"
-            android:onClick="addFriend"
+            android:onClick="requestFriend"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             android:padding="12dp"
@@ -99,6 +99,16 @@
             android:layout_weight="5"/>
     </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+             android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content">
     <TextView
         android:text="@string/friends_list"
         android:layout_width="match_parent"
@@ -117,7 +127,34 @@
         android:id="@+id/friends_list">
 
     </ListView>
+            </LinearLayout>
 
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content">
+                <TextView
+                    android:text="@string/requests_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#ffffff"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/abc_text_size_subhead_material"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:layout_gravity="center"
+                    android:textAllCaps="true"
+                    />
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/requests_list">
+
+                </ListView>
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 </LinearLayout>

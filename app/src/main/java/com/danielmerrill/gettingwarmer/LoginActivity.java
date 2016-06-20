@@ -107,8 +107,8 @@ public class LoginActivity extends AppCompatActivity {
     public void SignUp(View v){
 
         Intent i = new Intent(LoginActivity.this,SignupActivity.class);
-        startActivity(i);
-        finish();
+        startActivityForResult(i, 0);
+
 
 
     }
@@ -127,6 +127,13 @@ public class LoginActivity extends AppCompatActivity {
 
         return valid;
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == 2){
+            finish();
+        }
     }
 
 }

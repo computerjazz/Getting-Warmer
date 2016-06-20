@@ -30,7 +30,8 @@ public class Homepage extends AppCompatActivity {
     // GPSTracker class
     GPSTracker gps;
     EditText friendUserName_input;
-    private ListView lv;
+    private ListView flv;
+    private ListView rlv;
     private String username;
     private ArrayList<String> friendsList;
 
@@ -44,6 +45,7 @@ public class Homepage extends AppCompatActivity {
         TextView userView = (TextView) findViewById(R.id.username_view);
         userView.setText(username);
         refreshFriendsList();
+        refreshRequestsList();
 
 
     }
@@ -71,7 +73,7 @@ public class Homepage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void addFriend(View v) {
+    public void requestFriend(View v) {
         friendUserName_input = (EditText)findViewById(R.id.input_friendUsername);
         final String friendUserName = friendUserName_input.getText().toString();
         //setContentView(R.layout.progressbar_layout);
@@ -83,8 +85,12 @@ public class Homepage extends AppCompatActivity {
 
 
         //Calling method to signup
-        if (isValid(friendUserName, friendUserName_input)) {
-            restInterface.addFriend(username, friendUserName, new Callback<LoginModel>() {
+        if (friendUserName.toLowerCase().equals(username.toLowerCase())) {
+            Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
+            friendUserName_input.startAnimation(shake);
+            Toast.makeText(Homepage.this, "That's you!", Toast.LENGTH_SHORT).show();
+        } else if (isValid(friendUserName, friendUserName_input)) {
+            restInterface.requestFriend(username, friendUserName, new Callback<LoginModel>() {
 
 
                 @Override
@@ -93,7 +99,7 @@ public class Homepage extends AppCompatActivity {
 
                     if (model.getStatus().equals("1")) {  //AddFriend Success
                         refreshFriendsList();
-                        Toast.makeText(Homepage.this, "Added " + friendUserName + " to friends", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Homepage.this, "Sent a friend request to " + friendUserName, Toast.LENGTH_SHORT).show();
                         friendUserName_input.setText("");
 
                         // hide keyboard
@@ -106,10 +112,23 @@ public class Homepage extends AppCompatActivity {
                         Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
                         friendUserName_input.startAnimation(shake);
                         Toast.makeText(Homepage.this, friendUserName + " does not exist", Toast.LENGTH_SHORT).show();
-                    }else if (model.getStatus().equals("3")) { // already friends
+                    }else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
+                        refreshFriendsList();
+                        refreshRequestsList();
+                        // hide keyboard
+                        friendUserName_input.setText("");
+                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        Toast.makeText(Homepage.this, "Now friends with " + friendUserName, Toast.LENGTH_SHORT).show();
+
+                    }else if (model.getStatus().equals("4")) { // already sent request
+                        // hide keyboard
+                        friendUserName_input.setText("");
+                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                         Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
                         friendUserName_input.startAnimation(shake);
-                        Toast.makeText(Homepage.this, "Already friends with " + friendUserName, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Homepage.this, "Request to " + friendUserName + " already sent", Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -184,11 +203,25 @@ public class Homepage extends AppCompatActivity {
                 android.R.layout.simple_list_item_1,
                 fl);
 
-        lv.setAdapter(arrayAdapter);
+        flv.setAdapter(arrayAdapter);
+    }
+
+    private void setRequestsList(ArrayList<String> rl) {
+
+        // This is the array adapter, it takes the context of the activity as a
+        // first parameter, the type of list view as a second parameter and your
+        // array as a third parameter.
+        java.util.Collections.sort(rl);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_list_item_1,
+                rl);
+
+        rlv.setAdapter(arrayAdapter);
     }
 
     private void refreshFriendsList() {
-        lv = (ListView) findViewById(R.id.friends_list);
+        flv = (ListView) findViewById(R.id.friends_list);
         setFriendsList(new ArrayList<String>());
 
         RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
@@ -224,9 +257,44 @@ public class Homepage extends AppCompatActivity {
                     Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
                 }
             });
+    }
+
+    private void refreshRequestsList() {
+        rlv = (ListView) findViewById(R.id.requests_list);
+        setRequestsList(new ArrayList<String>());
+
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+
+        //Creating Rest Services
+        final RestInterface restInterface = adapter.create(RestInterface.class);
 
 
+        //Calling method to get friends list
+        restInterface.getRequests(username, new Callback<LoginModel>() {
 
 
+            @Override
+            public void success(LoginModel model, Response response) {
+
+                if (model.getStatus().equals("1")) {  //get friend requests Success
+                    ArrayList<String> requests = (ArrayList<String>) model.getRequests();
+                    //Toast.makeText(Homepage.this, "Got " + friends.size() + " friends: " + friends.get(0), Toast.LENGTH_SHORT).show();
+                    setRequestsList(requests);
+
+                } else if (model.getStatus().equals("2")) { // database error
+
+                    Toast.makeText(Homepage.this, "Couldn't get friend requests", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+                String merror = error.getMessage();
+                Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

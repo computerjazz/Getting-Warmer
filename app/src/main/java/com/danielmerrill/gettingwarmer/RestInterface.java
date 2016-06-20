@@ -33,8 +33,19 @@ public interface RestInterface {
                    Callback<LoginModel> pm);
 
     @FormUrlEncoded
+    @POST("/requestfriend")
+    void requestFriend(@Field("username") String username,
+                   @Field("friendUsername") String friendUsername,
+                   Callback<LoginModel> pm);
+
+    @FormUrlEncoded
     @POST("/getfriends")
     void getFriends(@Field("username") String username,
+                    Callback<LoginModel> cb);
+
+    @FormUrlEncoded
+    @POST("/getrequests")
+    void getRequests(@Field("username") String username,
                     Callback<LoginModel> cb);
 
     @FormUrlEncoded

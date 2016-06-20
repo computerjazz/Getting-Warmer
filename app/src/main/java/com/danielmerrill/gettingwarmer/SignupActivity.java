@@ -27,9 +27,11 @@ import retrofit.client.Response;
 public class SignupActivity extends AppCompatActivity {
 
     EditText pass,username;
+    int activityResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        activityResult = 0;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
@@ -47,8 +49,7 @@ public class SignupActivity extends AppCompatActivity {
 
     public void toLoginScreen(View v) {
 
-        Intent i = new Intent(SignupActivity.this,LoginActivity.class);
-        startActivity(i);
+
         finish();
     }
 
@@ -82,7 +83,7 @@ public class SignupActivity extends AppCompatActivity {
 
 
                             if (model.getStatus().equals("1")) {  //Signup Success
-
+                                setResult(2);
                                 Toast.makeText(SignupActivity.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
                                 finish();
                                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -138,6 +139,16 @@ public class SignupActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    protected void onStop() {
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
 }

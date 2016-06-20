@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "312668278194",
+    "firebase_url": "https://project-3097408041042038311.firebaseio.com",
+    "project_id": "project-3097408041042038311",
+    "storage_bucket": "project-3097408041042038311.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312668278194:android:ab1199af3645f707",
+        "android_client_info": {
+          "package_name": "com.danielmerrill.gettingwarmer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312668278194-tn1i1vf4k81p62huvjkdv49bhogmlehm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8to852RNv6rO_zmY_iocP73cBKct6UpE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
