@@ -6,12 +6,14 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit.Callback;
@@ -44,8 +47,36 @@ public class Homepage extends AppCompatActivity {
         username = prefs.getString("username", "");
         TextView userView = (TextView) findViewById(R.id.username_view);
         userView.setText(username);
+        friendUserName_input = (EditText)findViewById(R.id.input_friendUsername);
+
+
+
         refreshFriendsList();
         refreshRequestsList();
+
+        // Set up a listener to run request friend from softkeyboard
+        friendUserName_input.setOnKeyListener(new View.OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                // If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    // Perform action on key press
+                    requestFriend(v);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+        // set up friend request list click handler to accept requests
+        rlv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,int position, long id)
+            {
+                String selectedFromList = (rlv.getItemAtPosition(position).toString());
+                acceptFriend(selectedFromList);
+
+            }});
 
 
     }
@@ -73,8 +104,62 @@ public class Homepage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void acceptFriend(String friendName) {
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+        final String friend = friendName;
+
+        //Creating Rest Services
+        final RestInterface restInterface = adapter.create(RestInterface.class);
+
+
+        //Calling method to signup
+            restInterface.requestFriend(username, friend, new Callback<LoginModel>() {
+
+
+                @Override
+                public void success(LoginModel model, Response response) {
+
+
+                    if (model.getStatus().equals("1")) {  //AddFriend Success
+                        refreshFriendsList();
+                        Toast.makeText(Homepage.this, "Accepted friend request from " + friend, Toast.LENGTH_SHORT).show();
+
+
+
+                    } else if (model.getStatus().equals("0"))  // Friend add failure
+                    {
+
+                        Toast.makeText(Homepage.this, friend + " does not exist", Toast.LENGTH_SHORT).show();
+                    }else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
+                        refreshFriendsList();
+                        refreshRequestsList();
+                        // hide keyboard
+
+                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        Toast.makeText(Homepage.this, "Now friends with " + friend, Toast.LENGTH_SHORT).show();
+
+                    }else if (model.getStatus().equals("4")) { // already sent request
+                        // hide keyboard
+
+                        Toast.makeText(Homepage.this, "Request to " + friend + " already sent", Toast.LENGTH_SHORT).show();
+                    }
+
+
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+
+                    String merror = error.getMessage();
+                    Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+
     public void requestFriend(View v) {
-        friendUserName_input = (EditText)findViewById(R.id.input_friendUsername);
+
         final String friendUserName = friendUserName_input.getText().toString();
         //setContentView(R.layout.progressbar_layout);
         //making object of RestAdapter
@@ -197,7 +282,7 @@ public class Homepage extends AppCompatActivity {
         // This is the array adapter, it takes the context of the activity as a
         // first parameter, the type of list view as a second parameter and your
         // array as a third parameter.
-        java.util.Collections.sort(fl);
+        Collections.sort(fl, String.CASE_INSENSITIVE_ORDER);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_1,
@@ -211,7 +296,7 @@ public class Homepage extends AppCompatActivity {
         // This is the array adapter, it takes the context of the activity as a
         // first parameter, the type of list view as a second parameter and your
         // array as a third parameter.
-        java.util.Collections.sort(rl);
+        Collections.sort(rl, String.CASE_INSENSITIVE_ORDER);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_1,
