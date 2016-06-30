@@ -10,7 +10,7 @@ import retrofit.http.POST;
 
 public interface RestInterface {
     //chnage your IP here if you working on local
-     String url = "http://192.168.0.3:8888/register-login/v1";
+     String url = "http://192.168.1.3:8888/register-login/v1";
     //For Hosting give the complete path before index.php
     //String url = "http://go2code.com/demo/android/register-login/v1";
 
@@ -58,10 +58,10 @@ public interface RestInterface {
     @POST("/setlocation")
     void setLocation(@Field("username") String username,
                      @Field("friendUsername") String friendUsername,
-                     @Field("latitude_target") String latitude_target,
-                     @Field("longitude_target") String longitude_target,
-                     @Field("latitude_start") String latitude_start,
-                     @Field("longitude_start") String longitude_start,
+                     @Field("latitude_target") double latitude_target,
+                     @Field("longitude_target") double longitude_target,
+                     @Field("latitude_start") double latitude_start,
+                     @Field("longitude_start") double longitude_start,
                      Callback<LoginModel> pm);
 
 }

@@ -47,11 +47,17 @@
         android:layout_weight="1"
         />
             </LinearLayout>
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/btn_droppin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:layout_weight="1"
         android:background="#C62828"
         android:textColor="#ffffff"
         android:textStyle="bold"
@@ -63,6 +69,18 @@
         android:layout_gravity="center"
         android:textAllCaps="true"
         android:text="Drop Pin"/>
+
+
+
+
+
+    </LinearLayout>
+        <TextView
+            android:id="@+id/distfromtarget"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Distance:" />
+
 
     <!-- Password Label -->
     <LinearLayout
@@ -86,16 +104,12 @@
             android:id="@+id/btn_addfriend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#0d42c6"
+            android:background="@drawable/ic_menu_add"
             android:textColor="#ffffff"
             android:textStyle="bold"
             android:onClick="requestFriend"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:padding="12dp"
             android:gravity="center_vertical|center_horizontal"
             android:layout_gravity="center"
-            android:text="+"
             android:layout_weight="5"/>
     </LinearLayout>
 
@@ -119,6 +133,7 @@
         android:gravity="center_vertical|center_horizontal"
         android:layout_gravity="center"
         android:textAllCaps="true"
+        android:padding="@dimen/abc_action_bar_default_padding_material"
         />
 
     <ListView
@@ -133,7 +148,13 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content">
+                android:layout_width="wrap_content"
+                android:background="#8254e4">
+                <LinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal">
+
                 <TextView
                     android:text="@string/requests_list"
                     android:layout_width="match_parent"
@@ -144,7 +165,23 @@
                     android:gravity="center_vertical|center_horizontal"
                     android:layout_gravity="center"
                     android:textAllCaps="true"
+                    android:layout_weight="1"
+                    android:onClick="refresh"
+                    android:padding="@dimen/abc_action_bar_default_padding_material"
                     />
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/btn_refresh"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="3"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/ic_menu_refresh"
+                        android:onClick="refresh"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:layout_gravity="center"
+                        android:padding="@dimen/abc_action_bar_default_padding_material"
+                        />
+                    </LinearLayout>
 
                 <ListView
                     android:layout_width="match_parent"
