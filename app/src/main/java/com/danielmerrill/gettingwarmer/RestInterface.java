@@ -10,7 +10,7 @@ import retrofit.http.POST;
 
 public interface RestInterface {
     //chnage your IP here if you working on local
-     String url = "http://192.168.1.3:8888/register-login/v1";
+     String url = "http://192.168.0.12:8888/register-login/v1";
     //For Hosting give the complete path before index.php
     //String url = "http://go2code.com/demo/android/register-login/v1";
 

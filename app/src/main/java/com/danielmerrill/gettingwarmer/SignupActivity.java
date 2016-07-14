@@ -105,7 +105,7 @@ public class SignupActivity extends AppCompatActivity {
                                 editor.putString("username", user);
                                 editor.commit();
 
-                                Intent i = new Intent(SignupActivity.this, Homepage.class);
+                                Intent i = new Intent(SignupActivity.this, Menu.class);
                                 startActivity(i);
 
                             } else if (model.getStatus().equals("0"))  // Signup failure

@@ -3,17 +3,14 @@ package com.danielmerrill.gettingwarmer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,18 +18,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.animation.Animation.AnimationListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class Homepage extends AppCompatActivity {
+public class Menu extends AppCompatActivity {
     // GPSTracker class
     GPSTracker gps;
     EditText friendUserName_input;
@@ -100,7 +95,7 @@ public class Homepage extends AppCompatActivity {
                 // get location info
                 // create class object
                 final String friend = flv.getItemAtPosition(position).toString();
-                gps = new GPSTracker(Homepage.this);
+                gps = new GPSTracker(Menu.this);
 
                 // check if GPS enabled
                 if(gps.canGetLocation()){
@@ -119,6 +114,10 @@ public class Homepage extends AppCompatActivity {
                         public void success(LoginModel model, Response response) {
 
                             if (model.getStatus().equals("1")) {  //getlocation Success
+                                if (model.getIsNew().equals("1")) { // check if location is new
+                                    Toast.makeText(getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
+
+                                }
                                 double targetLat = Double.parseDouble(model.getLatitudeTarget());
                                 double targetLong = Double.parseDouble(model.getLongitudeTarget());
 
@@ -142,7 +141,7 @@ public class Homepage extends AppCompatActivity {
                         public void failure(RetrofitError error) {
 
                             String merror = error.getMessage();
-                            Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                            Toast.makeText(Menu.this, merror, Toast.LENGTH_LONG).show();
                         }
                     });
                 }else{
@@ -164,7 +163,7 @@ public class Homepage extends AppCompatActivity {
                 // get location info
                 // create class object
                 final String friend = flv.getItemAtPosition(pos).toString();
-                gps = new GPSTracker(Homepage.this);
+                gps = new GPSTracker(Menu.this);
 
                 // check if GPS enabled
                 if(gps.canGetLocation()){
@@ -183,7 +182,7 @@ public class Homepage extends AppCompatActivity {
                         public void success(LoginModel model, Response response) {
 
                             if (model.getStatus().equals("1")) {  //setlocation Success
-                                Toast.makeText(Homepage.this, "Set location to " + friend, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(Menu.this, "Set location to " + friend, Toast.LENGTH_SHORT).show();
 
 
                             } else if (model.getStatus().equals("0")) {
@@ -201,7 +200,7 @@ public class Homepage extends AppCompatActivity {
                         public void failure(RetrofitError error) {
 
                             String merror = error.getMessage();
-                            Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                            Toast.makeText(Menu.this, merror, Toast.LENGTH_LONG).show();
                         }
                     });
                     Toast.makeText(getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
@@ -229,7 +228,7 @@ public class Homepage extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_homepage, menu);
         return true;
@@ -267,13 +266,13 @@ public class Homepage extends AppCompatActivity {
 
                     if (model.getStatus().equals("1")) {  //AddFriend Success
                         refreshFriendsList();
-                        Toast.makeText(Homepage.this, "Accepted friend request from " + friend, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Accepted friend request from " + friend, Toast.LENGTH_SHORT).show();
                         
 
                     } else if (model.getStatus().equals("0"))  // Friend add failure
                     {
 
-                        Toast.makeText(Homepage.this, friend + " does not exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, friend + " does not exist", Toast.LENGTH_SHORT).show();
                     }else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
                         refreshFriendsList();
                         refreshRequestsList();
@@ -281,12 +280,12 @@ public class Homepage extends AppCompatActivity {
 
                         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                        Toast.makeText(Homepage.this, "Now friends with " + friend, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Now friends with " + friend, Toast.LENGTH_SHORT).show();
 
                     }else if (model.getStatus().equals("4")) { // already sent request
                         // hide keyboard
 
-                        Toast.makeText(Homepage.this, "Request to " + friend + " already sent", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Request to " + friend + " already sent", Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -296,7 +295,7 @@ public class Homepage extends AppCompatActivity {
                 public void failure(RetrofitError error) {
 
                     String merror = error.getMessage();
-                    Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                    Toast.makeText(Menu.this, merror, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -317,7 +316,7 @@ public class Homepage extends AppCompatActivity {
         if (friendUserName.toLowerCase().equals(username.toLowerCase())) {
             Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
             friendUserName_input.startAnimation(shake);
-            Toast.makeText(Homepage.this, "That's you!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Menu.this, "That's you!", Toast.LENGTH_SHORT).show();
         } else if (isValid(friendUserName, friendUserName_input)) {
             restInterface.requestFriend(username, friendUserName, new Callback<LoginModel>() {
 
@@ -328,7 +327,7 @@ public class Homepage extends AppCompatActivity {
 
                     if (model.getStatus().equals("1")) {  //AddFriend Success
                         refreshFriendsList();
-                        Toast.makeText(Homepage.this, "Sent a friend request to " + friendUserName, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Sent a friend request to " + friendUserName, Toast.LENGTH_SHORT).show();
                         friendUserName_input.setText("");
 
                         // hide keyboard
@@ -340,7 +339,7 @@ public class Homepage extends AppCompatActivity {
                     {
                         Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
                         friendUserName_input.startAnimation(shake);
-                        Toast.makeText(Homepage.this, friendUserName + " does not exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, friendUserName + " does not exist", Toast.LENGTH_SHORT).show();
                     }else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
                         refreshFriendsList();
                         refreshRequestsList();
@@ -348,7 +347,7 @@ public class Homepage extends AppCompatActivity {
                         friendUserName_input.setText("");
                         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                        Toast.makeText(Homepage.this, "Now friends with " + friendUserName, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Now friends with " + friendUserName, Toast.LENGTH_SHORT).show();
 
                     }else if (model.getStatus().equals("4")) { // already sent request
                         // hide keyboard
@@ -357,7 +356,7 @@ public class Homepage extends AppCompatActivity {
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                         Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
                         friendUserName_input.startAnimation(shake);
-                        Toast.makeText(Homepage.this, "Request to " + friendUserName + " already sent", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Request to " + friendUserName + " already sent", Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -367,7 +366,7 @@ public class Homepage extends AppCompatActivity {
                 public void failure(RetrofitError error) {
 
                     String merror = error.getMessage();
-                    Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                    Toast.makeText(Menu.this, merror, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -380,7 +379,7 @@ public class Homepage extends AppCompatActivity {
     public void dropPin(View v) {
         // get location info
         // create class object
-        gps = new GPSTracker(Homepage.this);
+        gps = new GPSTracker(Menu.this);
 
         // check if GPS enabled
         if(gps.canGetLocation()){
@@ -405,7 +404,7 @@ public class Homepage extends AppCompatActivity {
         editor.putString("username", "");
         editor.commit();
         finish();
-        Intent i = new Intent(Homepage.this, LoginActivity.class);
+        Intent i = new Intent(Menu.this, LoginActivity.class);
         startActivity(i);
     }
 
@@ -464,7 +463,7 @@ public class Homepage extends AppCompatActivity {
 
                     } else if (model.getStatus().equals("2")) { // database error
 
-                        Toast.makeText(Homepage.this, "Couldn't get friends", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Menu.this, "Couldn't get friends", Toast.LENGTH_SHORT).show();
                     }
 
 
@@ -474,7 +473,7 @@ public class Homepage extends AppCompatActivity {
                 public void failure(RetrofitError error) {
 
                     String merror = error.getMessage();
-                    Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                    Toast.makeText(Menu.this, merror, Toast.LENGTH_LONG).show();
                 }
             });
     }
@@ -503,7 +502,7 @@ public class Homepage extends AppCompatActivity {
 
                 } else if (model.getStatus().equals("2")) { // database error
 
-                    Toast.makeText(Homepage.this, "Couldn't get friend requests", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Menu.this, "Couldn't get friend requests", Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -513,7 +512,7 @@ public class Homepage extends AppCompatActivity {
             public void failure(RetrofitError error) {
 
                 String merror = error.getMessage();
-                Toast.makeText(Homepage.this, merror, Toast.LENGTH_LONG).show();
+                Toast.makeText(Menu.this, merror, Toast.LENGTH_LONG).show();
             }
         });
     }

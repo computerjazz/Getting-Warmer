@@ -34,6 +34,9 @@ public class LoginModel {
     @SerializedName("longitude_start")
     @Expose
     private String longitudeStart;
+    @SerializedName("is_new")
+    @Expose
+    private String isNew;
     @SerializedName("friends")
     @Expose
     private List<String> friends = new ArrayList<String>();
@@ -95,6 +98,8 @@ public class LoginModel {
         this.latitudeTarget = latitudeTarget;
     }
 
+
+
     /**
      *
      * @return
@@ -147,6 +152,24 @@ public class LoginModel {
      */
     public void setLongitudeStart(String longitudeStart) {
         this.longitudeStart = longitudeStart;
+    }
+
+    /**
+     *
+     * @return
+     * The is new token
+     */
+    public String getIsNew() {
+        return isNew;
+    }
+
+    /**
+     *
+     * @param isNew
+     * The is_new token
+     */
+    public void setIsNew(String isNew) {
+        this.isNew = isNew;
     }
 
     /**
