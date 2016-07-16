@@ -92,7 +92,7 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("username", user);
                         editor.commit();
                         //Toast.makeText(LoginActivity.this, prefs.getString("username", ""), Toast.LENGTH_SHORT).show();
-                        Intent i = new Intent(LoginActivity.this, Menu.class);
+                        Intent i = new Intent(LoginActivity.this, ColorActivity.class);
                         startActivity(i);
                         finish();
 

@@ -1,12 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.danielmerrill.gettingwarmer.ColorActivity">
+    android:layout_height="match_parent">
 
-</RelativeLayout>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/material_blue_grey_800"
+        android:id="@+id/main_color_display">
+        <ImageView
+            android:layout_height="30dp"
+            android:layout_width="30dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_people_white_24dp"
+            android:id="@+id/friendsIcon"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/users_title"
+            android:layout_below="@+id/friendsIcon"
+            android:textColor="@color/white"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/percentage_display"
+            android:layout_below="@+id/users_title"
+            android:textColor="@color/white"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/distance_display"
+            android:layout_below="@+id/percentage_display"
+            android:textColor="@color/white"/>
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/fragment_container"
+        android:background="@color/accent_material_light"
+        android:layout_gravity="start|left">
+
+    </LinearLayout>
+</android.support.v4.widget.DrawerLayout>

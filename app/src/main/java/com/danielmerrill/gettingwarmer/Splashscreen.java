@@ -18,7 +18,7 @@ public class Splashscreen extends AppCompatActivity {
         finish();
         Intent i;
         if (user.length() > 0) {
-            i = new Intent(Splashscreen.this, Menu.class);
+            i = new Intent(Splashscreen.this, ColorActivity.class);
 
         } else {
             i = new Intent(Splashscreen.this, LoginActivity.class);
