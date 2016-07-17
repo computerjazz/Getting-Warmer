@@ -2,9 +2,7 @@ package com.danielmerrill.gettingwarmer;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,9 +27,13 @@ import retrofit.client.Response;
 public class ColorActivity extends AppCompatActivity {
     private DrawerLayout mDrawer;
 
+    private Timer myTimer;
+
     private ImageView mFriends;
     private TextView percentageDisplay;
     private TextView distanceDisplay;
+    private TextView initialDisplay;
+    private RelativeLayout mainColorDisplay;
 
     private GPSTracker gps;
     private String username;
@@ -57,6 +60,8 @@ public class ColorActivity extends AppCompatActivity {
         mFriends = (ImageView) findViewById(R.id.friendsIcon);
         percentageDisplay = (TextView) findViewById(R.id.percentage_display);
         distanceDisplay = (TextView) findViewById(R.id.distance_display);
+        initialDisplay = (TextView) findViewById(R.id.initial_display);
+        mainColorDisplay = (RelativeLayout) findViewById(R.id.main_color_display);
 
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
@@ -119,13 +124,53 @@ public class ColorActivity extends AppCompatActivity {
                 mDrawer.openDrawer(Gravity.LEFT);
             }
         });
+
+        myTimer = new Timer();
+        myTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TimerMethod();
+            }
+
+        }, 0, 2000);
     }
+
+    private void TimerMethod()
+    {
+        //This method is called directly by the timer
+        //and runs in the same thread as the timer.
+
+        //We call the method that will work with the UI
+        //through the runOnUiThread method.
+        this.runOnUiThread(Timer_Tick);
+    }
+
+
+    private Runnable Timer_Tick = new Runnable() {
+        public void run() {
+
+            //This method runs in the same thread as the UI.
+
+            //Do something to the UI thread here
+            checkLocation(friendUsername);
+
+        }
+    };
 
 
 
     private void updateDisplays() {
-        percentageDisplay.setText(String.valueOf((int) getPercentageComplete() + "%"));
-        distanceDisplay.setText(String.valueOf((int) getCurrentDistance() + " meters"));
+        percentageDisplay.setText(String.valueOf(getPercentageComplete() + "%"));
+        distanceDisplay.setText(String.valueOf((int) getCurrentDistance() + "m"));
+        initialDisplay.setText(String.valueOf((int) getInitialDistance() + "m"));
+        int blue = (int) ((getPercentageComplete()/100.0) * 255);
+        if (blue > 255) {
+            blue = 255;
+        }
+
+        int red = 255 - blue;
+
+        mainColorDisplay.setBackgroundColor(Color.rgb(red,0,blue));
     }
 
     @Override
@@ -159,6 +204,10 @@ public class ColorActivity extends AppCompatActivity {
 
     public void setFriendUsername(String friendUsername) {
         this.friendUsername = friendUsername;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("friendUsername", friendUsername);
+        editor.commit();
         TextView tv = (TextView) findViewById(R.id.users_title);
         tv.setText(username + " to " + friendUsername);
         checkLocation(friendUsername);
@@ -167,19 +216,23 @@ public class ColorActivity extends AppCompatActivity {
     }
 
     private void setCurrentCoordinates(double latitude, double longitude) {
-        Toast.makeText(getApplicationContext(), latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
         currentLatitude = latitude;
         currentLongitude = longitude;
     }
 
-    public double getPercentageComplete() {
+    public int getPercentageComplete() {
+
         initialDist = Utils.distFrom(initialLatitude, initialLongitude, targetLatitude, targetLongitude);
         currentDist = Utils.distFrom(currentLatitude, currentLongitude, targetLatitude, targetLongitude);
-        return currentDist/initialDist;
+        return (int) ((currentDist/initialDist) * 100);
     }
 
     public double getCurrentDistance() {
         return Utils.distFrom(currentLatitude, currentLongitude, targetLatitude, targetLongitude);
+    }
+
+    public double getInitialDistance() {
+        return Utils.distFrom(initialLatitude, initialLongitude, targetLatitude, targetLongitude);
     }
 
 
@@ -200,27 +253,42 @@ public class ColorActivity extends AppCompatActivity {
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
             //Calling method
-            restInterface.getLocation(friend, username, new Callback<LoginModel>() {
+            restInterface.getLocation(username, friend, new Callback<LoginModel>() {
 
                 @Override
                 public void success(LoginModel model, Response response) {
 
                     if (model.getStatus().equals("1")) {  //getlocation Success
-                        if (model.getIsNew().equals("1")) { // check if location is new
-                            Toast.makeText(getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
+
+                        if (model.getLatitudeTarget() == null && model.getLongitudeTarget() == null) {
+                            Toast.makeText(getApplicationContext(), "Target not set!", Toast.LENGTH_SHORT).show();
+                        } else {
+
+                            targetLatitude = Double.parseDouble(model.getLatitudeTarget());
+                            targetLongitude = Double.parseDouble(model.getLongitudeTarget());
+                            if (model.getIsNew().equals("1")) { // check if location is new
+                                Toast.makeText(getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
+                                initialLatitude = latitude;
+                                initialLongitude = longitude;
+                                setInitialLocation(friend, targetLatitude, targetLongitude, currentLatitude, currentLongitude);
+
+                            } else {
+                                initialLatitude = Double.parseDouble(model.getLatitudeStart());
+                                initialLongitude = Double.parseDouble(model.getLongitudeStart());
+
+                            }
+
+
+
+
+                            double diff = Utils.distFrom(targetLatitude, targetLongitude, latitude, longitude);
+                            //distFromTarget.setText("Distance from " + friend + ": " + (int)diff + " meters");
+                            //Toast.makeText(getApplicationContext(), "Your lat: " + latitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + longitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_SHORT).show();
+                            updateDisplays();
 
                         }
-                        targetLatitude = Double.parseDouble(model.getLatitudeTarget());
-                        targetLongitude = Double.parseDouble(model.getLongitudeTarget());
-
-                        initialLatitude = Double.parseDouble(model.getLatitudeStart());
-                        initialLongitude = Double.parseDouble(model.getLongitudeStart());
 
 
-                        double diff = Utils.distFrom(targetLatitude, targetLongitude, latitude, longitude);
-                        //distFromTarget.setText("Distance from " + friend + ": " + (int)diff + " meters");
-                        Toast.makeText(getApplicationContext(), "Your lat: " + latitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + longitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_SHORT).show();
-                        updateDisplays();
 
 
                     } else if (model.getStatus().equals("0")) {
@@ -248,6 +316,41 @@ public class ColorActivity extends AppCompatActivity {
             // Ask user to enable GPS/network in settings
             gps.showSettingsAlert();
         }
+    }
+
+    private void setInitialLocation(String friendUsername, double targetLatitude, double targetLongitude, double currentLatitude, double currentLongitude) {
+
+        final String friend = friendUsername;
+
+        //Creating Rest Services
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+        final RestInterface restInterface = adapter.create(RestInterface.class);
+
+        //Calling method
+        restInterface.setLocation(username, friend, targetLatitude, targetLongitude, currentLatitude, currentLongitude, new Callback<LoginModel>() {
+
+            @Override
+            public void success(LoginModel model, Response response) {
+
+                if (model.getStatus().equals("1")) {  //setlocation Success
+                    Toast.makeText(getApplicationContext(), "Set initial location to " + friend, Toast.LENGTH_SHORT).show();
+
+
+                } else if (model.getStatus().equals("0")) {
+
+                } else if (model.getStatus().equals("2")) {
+
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+                String merror = error.getMessage();
+                Toast.makeText(getApplicationContext(), merror, Toast.LENGTH_LONG).show();
+            }
+        });
+        // Toast.makeText(getActivity().getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
     }
 
     // when logout button is clicked

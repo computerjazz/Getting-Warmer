@@ -112,9 +112,9 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 // get location info
                 // create class object
                 final String friend = flv.getItemAtPosition(position).toString();
-                checkLocation(friend);
+                //checkLocation(friend);
                 colorActivity.setFriendUsername(friend);
-                colorActivity.setTargetLocation(targetLatitude, targetLongitude);
+                //colorActivity.setTargetLocation(targetLatitude, targetLongitude);
                 mDrawerLayout.closeDrawers();
 
             }
@@ -129,7 +129,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 // get location info
                 // create class object
                 final String friend = flv.getItemAtPosition(pos).toString();
-                setLocation(friend);
+                sendLocation(friend);
                 return true;
             }
         });
@@ -165,37 +165,76 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     }
 
-    private void checkLocation(String friendUsername) {
+    private void setInitialLocation(String friendUsername, double targetLatitude, double targetLongitude, double currentLatitude, double currentLongitude) {
+
+        final String friend = friendUsername;
+
+        //Creating Rest Services
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+        final RestInterface restInterface = adapter.create(RestInterface.class);
+
+        //Calling method
+        restInterface.setLocation(username, friend, targetLatitude, targetLongitude, currentLatitude, currentLongitude, new Callback<LoginModel>() {
+
+            @Override
+            public void success(LoginModel model, Response response) {
+
+                if (model.getStatus().equals("1")) {  //setlocation Success
+                    //Toast.makeText(getActivity().getApplicationContext(), "Set location to " + friend, Toast.LENGTH_SHORT).show();
+
+
+                } else if (model.getStatus().equals("0")) {
+
+                } else if (model.getStatus().equals("2")) {
+
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+                String merror = error.getMessage();
+                Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
+            }
+        });
+       // Toast.makeText(getActivity().getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+    }
+
+
+
+    private void checkLocation(final String friendUsername) {
         final String friend = friendUsername;
         gps = new GPSTracker(getActivity());
 
         // check if GPS enabled
         if(gps.canGetLocation()){
 
-            final double latitude = gps.getLatitude();
-            final double longitude = gps.getLongitude();
+            final double currentLatitude = gps.getLatitude();
+            final double currentLongitude = gps.getLongitude();
 
             //Creating Rest Services
             RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
             //Calling method
-            restInterface.getLocation(friend, username, new Callback<LoginModel>() {
+            restInterface.getLocation(username, friend, new Callback<LoginModel>() {
 
                 @Override
                 public void success(LoginModel model, Response response) {
 
                     if (model.getStatus().equals("1")) {  //getlocation Success
-                        if (model.getIsNew().equals("1")) { // check if location is new
-                            Toast.makeText(getActivity().getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
 
-                        }
                         targetLatitude = Double.parseDouble(model.getLatitudeTarget());
                         targetLongitude = Double.parseDouble(model.getLongitudeTarget());
 
-                        double diff = Utils.distFrom(targetLatitude, targetLongitude, latitude, longitude);
+                        if (model.getIsNew().equals("1")) { // check if location is new
+                            Toast.makeText(getActivity().getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
+                            setInitialLocation(friendUsername, targetLatitude, targetLongitude, currentLatitude, currentLongitude);
+                        }
+
+                        double diff = Utils.distFrom(targetLatitude, targetLongitude, currentLatitude, currentLongitude);
                         distFromTarget.setText("Distance from " + friend + ": " + (int)diff + " meters");
-                        Toast.makeText(getActivity().getApplicationContext(), "Your lat: " + latitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + longitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getActivity().getApplicationContext(), "Your lat: " + currentLatitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + currentLongitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_LONG).show();
 
 
                     } else if (model.getStatus().equals("0")) {
@@ -204,10 +243,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                     } else if (model.getStatus().equals("2")) {
 
                     }
-
-
-
-
                 }
 
                 @Override
@@ -226,7 +261,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
     }
 
     // Set location of friend with username 'f'
-    private void setLocation(String friendUsername) {
+    private void sendLocation(String friendUsername) {
         final String friend = friendUsername;
         gps = new GPSTracker(getActivity());
 
@@ -240,7 +275,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
-            //Calling method
+            //Calling method -- sending 0.0 is ugly but restInterface won't take null
             restInterface.setLocation(friend, username, latitude, longitude, 0.0, 0.0, new Callback<LoginModel>() {
 
                 @Override
@@ -264,7 +299,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                     Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
                 }
             });
-            Toast.makeText(getActivity().getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getActivity().getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
         } else {
             // can't get location
             // GPS or Network is not enabled
