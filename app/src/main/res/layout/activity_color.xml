@@ -10,24 +10,43 @@
         android:layout_height="match_parent"
         android:background="@color/material_blue_grey_800"
         android:id="@+id/main_color_display">
-        <ImageView
-            android:layout_height="30dp"
-            android:layout_width="30dp"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_people_white_24dp"
-            android:id="@+id/friendsIcon"/>
-        <TextView
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/users_title"
-            android:layout_below="@+id/friendsIcon"
-            android:textColor="@color/white"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:id="@+id/layout_topBar">
+            <ImageView
+                android:layout_height="30dp"
+                android:layout_width="30dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="start"
+                android:src="@drawable/ic_people_white_24dp"
+                android:id="@+id/friendsIcon"
+                />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                />
+            <ImageView
+                android:layout_height="30dp"
+                android:layout_width="30dp"
+                android:layout_margin="10dp"
+                android:src="@drawable/ic_more_vert_white_24dp"
+                android:layout_gravity="end"
+                android:id="@+id/menuIcon"
+                android:onClick="showPopup"
+                />
+        </LinearLayout>
+
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:id="@+id/percentage_display"
-            android:layout_below="@+id/users_title"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:layout_below="@+id/layout_topBar"/>
+
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
@@ -40,6 +59,19 @@
             android:id="@+id/initial_display"
             android:layout_below="@+id/distance_display"
             android:textColor="@color/white"/>
+
+
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/users_title"
+            android:layout_margin="20dp"
+            android:gravity="center_horizontal"
+            android:textAllCaps="true"
+            android:textSize="@dimen/abc_text_size_display_1_material"
+            android:layout_alignParentBottom="true"
+            android:textColor="@color/white"/>
+
 
     </RelativeLayout>
     <LinearLayout

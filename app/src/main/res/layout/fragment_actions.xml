@@ -13,7 +13,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:background="#5468e4"
+    android:background="@color/primary_material_light"
     android:orientation="vertical"
     android:animateLayoutChanges="true"
      >
@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_weight="1"
         android:id="@+id/menu_scrollview">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -38,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:id="@+id/username_view"
-        android:textColor="#ffffff"
+        android:textColor="@color/primary_material_dark"
         android:textStyle="bold"
         android:textSize="@dimen/abc_text_size_headline_material"
         android:gravity="center_vertical|center_horizontal"
@@ -46,13 +47,6 @@
         android:textAllCaps="true" />
 
 
-
-    <TextView
-        android:id="@+id/distfromtarget"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:textColor="#ffffff"
-        android:text="Distance:" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,12 +60,11 @@
             android:text="@string/requests_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
+            android:textColor="@color/primary_material_dark"
             android:textStyle="bold"
             android:textSize="@dimen/abc_text_size_subhead_material"
             android:gravity="center_vertical|center_horizontal"
             android:layout_gravity="center"
-            android:textAllCaps="true"
             android:layout_weight="1"
             android:padding="@dimen/abc_action_bar_default_padding_material"
             />
@@ -92,12 +85,11 @@
         android:text="@string/friends_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#ffffff"
+        android:textColor="@color/primary_material_dark"
         android:textStyle="bold"
         android:textSize="@dimen/abc_text_size_subhead_material"
         android:gravity="center_vertical|center_horizontal"
         android:layout_gravity="center"
-        android:textAllCaps="true"
         android:id="@+id/textview_friends"
         android:padding="@dimen/abc_action_bar_default_padding_material"
         />
@@ -114,7 +106,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#ffffff"
+            android:textColor="@color/primary_material_dark"
             android:id="@+id/friends_list"
             android:visibility="visible">
         </com.danielmerrill.gettingwarmer.NoScrollListView>
@@ -144,8 +136,8 @@
             android:layout_height="wrap_content"
             android:inputType="text"
             android:singleLine="true"
-            android:textColor="#ffffff"
-            android:textColorHint="#ffffff"
+            android:textColor="@color/primary_material_dark"
+            android:textColorHint="@color/primary_material_dark"
             android:hint="Add Friend"
             android:layout_weight="5"
             android:maxLength="15"/>
@@ -154,8 +146,8 @@
             android:id="@+id/btn_addfriendIcon"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:background="@drawable/ic_person_add_white_24dp"
-            android:textColor="#ffffff"
+            android:background="@drawable/ic_person_add_dark_24dp"
+            android:textColor="@color/primary_material_dark"
             android:textStyle="bold"
             />
     </LinearLayout>
@@ -169,6 +161,6 @@
             android:layout_marginTop="10dp"
 
             android:layout_gravity="end|right"
-            android:src="@drawable/ic_close_white_24dp"
+            android:src="@drawable/ic_close_dark_24dp"
             android:id="@+id/closeDrawer"/>
 </FrameLayout>

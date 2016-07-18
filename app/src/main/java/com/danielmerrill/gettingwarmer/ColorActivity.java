@@ -7,10 +7,13 @@ import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,7 +27,7 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class ColorActivity extends AppCompatActivity {
+public class ColorActivity extends AppCompatActivity  {
     private DrawerLayout mDrawer;
 
     private Timer myTimer;
@@ -36,6 +39,7 @@ public class ColorActivity extends AppCompatActivity {
     private RelativeLayout mainColorDisplay;
 
     private GPSTracker gps;
+
     private String username;
     private String friendUsername;
 
@@ -54,8 +58,11 @@ public class ColorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color);
 
+
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         username = prefs.getString("username", "");
+        friendUsername = prefs.getString("friendUsername", "");
 
         mFriends = (ImageView) findViewById(R.id.friendsIcon);
         percentageDisplay = (TextView) findViewById(R.id.percentage_display);
@@ -63,32 +70,12 @@ public class ColorActivity extends AppCompatActivity {
         initialDisplay = (TextView) findViewById(R.id.initial_display);
         mainColorDisplay = (RelativeLayout) findViewById(R.id.main_color_display);
 
-        // Check that the activity is using the layout version with
-        // the fragment_container FrameLayout
-        if (findViewById(R.id.fragment_container) != null) {
-
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
-            if (savedInstanceState != null) {
-                return;
-            }
-
-            // Create a new Fragment to be placed in the activity layout
-            ActionsFragment actionsFragment = new ActionsFragment();
-
-            // In case this activity was started with special instructions from an
-            // Intent, pass the Intent's extras to the fragment as arguments
-            actionsFragment.setArguments(getIntent().getExtras());
-
-            // Add the fragment to the 'fragment_container' FrameLayout
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, actionsFragment).commit();
+        if (friendUsername.length() > 0) {
+            setFriendUsername(friendUsername);
         }
 
-
-
-
+        // Check that the activity is using the layout version with
+        // the fragment_container FrameLayout
 
 
         View drawerView = findViewById(R.id.drawer_layout);
@@ -121,10 +108,40 @@ public class ColorActivity extends AppCompatActivity {
         mFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 mDrawer.openDrawer(Gravity.LEFT);
             }
         });
 
+        if (findViewById(R.id.fragment_container) != null) {
+
+
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            // Create a new Fragment to be placed in the activity layout
+            ActionsFragment actionsFragment = new ActionsFragment();
+
+            // In case this activity was started with special instructions from an
+            // Intent, pass the Intent's extras to the fragment as arguments
+            actionsFragment.setArguments(getIntent().getExtras());
+
+            // Add the fragment to the 'fragment_container' FrameLayout
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, actionsFragment).commit();
+        }
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myTimer = new Timer();
         myTimer.schedule(new TimerTask() {
             @Override
@@ -132,8 +149,24 @@ public class ColorActivity extends AppCompatActivity {
                 TimerMethod();
             }
 
-        }, 0, 2000);
+        }, 0, 1000);
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        myTimer.cancel();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+
+    }
+
+
 
     private void TimerMethod()
     {
@@ -148,14 +181,35 @@ public class ColorActivity extends AppCompatActivity {
 
     private Runnable Timer_Tick = new Runnable() {
         public void run() {
-
             //This method runs in the same thread as the UI.
-
-            //Do something to the UI thread here
             checkLocation(friendUsername);
 
         }
     };
+
+    public void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_homepage, popup.getMenu());
+        popup.show();
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_logout:
+                        logOut();
+                        return true;
+
+                    default:
+                        return false;
+
+                }
+            }
+        });
+    }
+
+
+
 
 
 
@@ -173,29 +227,7 @@ public class ColorActivity extends AppCompatActivity {
         mainColorDisplay.setBackgroundColor(Color.rgb(red,0,blue));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu_homepage, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_logout:
-                logOut();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-
-        }
-    }
 
     public void setTargetLocation(double latitude, double longitude) {
         targetLatitude = latitude;
@@ -209,7 +241,7 @@ public class ColorActivity extends AppCompatActivity {
         editor.putString("friendUsername", friendUsername);
         editor.commit();
         TextView tv = (TextView) findViewById(R.id.users_title);
-        tv.setText(username + " to " + friendUsername);
+        tv.setText(friendUsername);
         checkLocation(friendUsername);
 
 
@@ -262,6 +294,7 @@ public class ColorActivity extends AppCompatActivity {
 
                         if (model.getLatitudeTarget() == null && model.getLongitudeTarget() == null) {
                             Toast.makeText(getApplicationContext(), "Target not set!", Toast.LENGTH_SHORT).show();
+                            myTimer.cancel();
                         } else {
 
                             targetLatitude = Double.parseDouble(model.getLatitudeTarget());
@@ -358,9 +391,16 @@ public class ColorActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("username", "");
+        editor.putString("friendUsername", "");
         editor.commit();
+        myTimer.cancel();
         finish();
         Intent i = new Intent(ColorActivity.this, LoginActivity.class);
         startActivity(i);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 }

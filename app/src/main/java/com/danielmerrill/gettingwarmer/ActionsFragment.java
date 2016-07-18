@@ -66,7 +66,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
         flv = (ListView) v.findViewById(R.id.friends_list);
         rlv = (ListView) v.findViewById(R.id.requests_list);
-        distFromTarget = (TextView) v.findViewById(R.id.distfromtarget);
         friendListTitle = (TextView) v.findViewById(R.id.textview_friends);
         friendsListView = (NoScrollListView) v.findViewById(R.id.friends_list);
         closeDrawer = (ImageView) v.findViewById(R.id.closeDrawer);
@@ -134,6 +133,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             }
         });
 
+        /*
         friendListTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,6 +145,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 }
             }
         });
+        */
 
         closeDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -197,7 +198,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
             }
         });
-       // Toast.makeText(getActivity().getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
     }
 
 
@@ -228,7 +228,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                         targetLongitude = Double.parseDouble(model.getLongitudeTarget());
 
                         if (model.getIsNew().equals("1")) { // check if location is new
-                            Toast.makeText(getActivity().getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity().getApplicationContext(), "New pin detected!", Toast.LENGTH_SHORT).show();
                             setInitialLocation(friendUsername, targetLatitude, targetLongitude, currentLatitude, currentLongitude);
                         }
 
@@ -282,7 +282,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 public void success(LoginModel model, Response response) {
 
                     if (model.getStatus().equals("1")) {  //setlocation Success
-                        Toast.makeText(getActivity().getApplicationContext(), "Set location to " + friend, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "Sent pin to " + friend, Toast.LENGTH_SHORT).show();
 
 
                     } else if (model.getStatus().equals("0")) {
@@ -437,30 +437,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             });
         }
     }
-
-
-
-    public void dropPin(View v) {
-        // get location info
-        // create class object
-        gps = new GPSTracker(getActivity());
-
-        // check if GPS enabled
-        if(gps.canGetLocation()){
-
-            double latitude = gps.getLatitude();
-            double longitude = gps.getLongitude();
-
-            // \n is for new line
-            Toast.makeText(getActivity().getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-        }else{
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-            gps.showSettingsAlert();
-        }
-    }
-
 
 
     //checking field are empty
