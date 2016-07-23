@@ -10,6 +10,17 @@
         android:layout_height="match_parent"
         android:background="@color/material_blue_grey_800"
         android:id="@+id/main_color_display">
+
+        <ImageView
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:id="@+id/ringView"
+            android:src="@drawable/ring"
+            android:alpha="0"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

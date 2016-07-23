@@ -1,20 +1,31 @@
 package com.danielmerrill.gettingwarmer;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +39,9 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 public class ColorActivity extends AppCompatActivity  {
+
+    private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
+
     private DrawerLayout mDrawer;
 
     private Timer myTimer;
@@ -38,13 +52,19 @@ public class ColorActivity extends AppCompatActivity  {
     private TextView initialDisplay;
     private RelativeLayout mainColorDisplay;
 
+    private ImageView ringView;
+    private boolean scaleToggle;
+
     private GPSTracker gps;
 
     private String username;
     private String friendUsername;
 
     private double initialDist;
+    private double lastDist;
     private double currentDist;
+    private boolean youAreCloser;
+    private int locationTickCounter;
 
     private double targetLatitude;
     private double targetLongitude;
@@ -63,16 +83,20 @@ public class ColorActivity extends AppCompatActivity  {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         username = prefs.getString("username", "");
         friendUsername = prefs.getString("friendUsername", "");
+        if (friendUsername.length() > 0) {
+            setFriendUsername(friendUsername);
+        }
 
         mFriends = (ImageView) findViewById(R.id.friendsIcon);
         percentageDisplay = (TextView) findViewById(R.id.percentage_display);
         distanceDisplay = (TextView) findViewById(R.id.distance_display);
         initialDisplay = (TextView) findViewById(R.id.initial_display);
         mainColorDisplay = (RelativeLayout) findViewById(R.id.main_color_display);
+        ringView = (ImageView) findViewById(R.id.ringView);
+        locationTickCounter = 0;
 
-        if (friendUsername.length() > 0) {
-            setFriendUsername(friendUsername);
-        }
+
+
 
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
@@ -81,61 +105,73 @@ public class ColorActivity extends AppCompatActivity  {
         View drawerView = findViewById(R.id.drawer_layout);
         if (drawerView != null && drawerView instanceof DrawerLayout) {
             mDrawer = (DrawerLayout)drawerView;
-            mDrawer.setDrawerListener(new DrawerLayout.DrawerListener() {
-                @Override
-                public void onDrawerSlide(View view, float v) {
-
-                }
-
-                @Override
-                public void onDrawerOpened(View view) {
-
-
-                }
-
-                @Override
-                public void onDrawerClosed(View view) {
-
-                }
-
-                @Override
-                public void onDrawerStateChanged(int i) {
-
-                }
-            });
         }
 
         mFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 mDrawer.openDrawer(Gravity.LEFT);
             }
         });
 
-        if (findViewById(R.id.fragment_container) != null) {
-
-
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
-            if (savedInstanceState != null) {
-                return;
+        mainColorDisplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayRing();
             }
+        });
 
-            // Create a new Fragment to be placed in the activity layout
-            ActionsFragment actionsFragment = new ActionsFragment();
+        if (findViewById(R.id.fragment_container) != null) {
+            if (savedInstanceState == null) {
+                ActionsFragment actionsFragment = new ActionsFragment();
+                actionsFragment.setArguments(getIntent().getExtras());
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.fragment_container, actionsFragment).commit();
+            }
+        }
+    }
 
-            // In case this activity was started with special instructions from an
-            // Intent, pass the Intent's extras to the fragment as arguments
-            actionsFragment.setArguments(getIntent().getExtras());
-
-            // Add the fragment to the 'fragment_container' FrameLayout
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, actionsFragment).commit();
+    private void displayRing() {
+        if (youAreCloser) {
+            ringView.getDrawable().setColorFilter(Color.MAGENTA, PorterDuff.Mode.MULTIPLY);
+        } else {
+            ringView.getDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.MULTIPLY);
         }
 
+        ringView.setScaleX(.1f);
+        ringView.setScaleY(.1f);
+        ringView.setAlpha(1f);
+        ringView.animate().scaleX(4).scaleY(4).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(1500).withEndAction(hideRing).start();
 
+                /*
+                final ShapeDrawable circle = new ShapeDrawable(new OvalShape());
+                circle.setIntrinsicWidth (20);
+                circle.setIntrinsicHeight (20);
+                circle.getPaint().setStyle(Paint.Style.STROKE);
+                circle.getPaint().setColor(getResources().getColor(R.color.white));
+                circle.getPaint().setStrokeWidth(5.0f);
+
+                ValueAnimator animation = ValueAnimator.ofFloat(0.0f,1.0f);
+                animation.setDuration(1500);
+
+                animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        Float tickValue = (Float)animation.getAnimatedValue();
+                        int padding = (int)(tickValue*100);
+                        int sideLength = (int)(tickValue*3000);
+
+                        ringView.getLayoutParams().height = sideLength;
+                        ringView.getLayoutParams().width = sideLength;
+
+
+                        ringView.setImageDrawable(circle);
+                        percentageDisplay.setText(animation.getAnimatedValue().toString());
+                    }
+                });
+
+                animation.start();
+                */
     }
 
     @Override
@@ -148,7 +184,6 @@ public class ColorActivity extends AppCompatActivity  {
             public void run() {
                 TimerMethod();
             }
-
         }, 0, 1000);
     }
 
@@ -162,27 +197,37 @@ public class ColorActivity extends AppCompatActivity  {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-
     }
 
 
 
     private void TimerMethod()
     {
-        //This method is called directly by the timer
-        //and runs in the same thread as the timer.
-
-        //We call the method that will work with the UI
-        //through the runOnUiThread method.
         this.runOnUiThread(Timer_Tick);
     }
 
 
     private Runnable Timer_Tick = new Runnable() {
         public void run() {
-            //This method runs in the same thread as the UI.
+            //R uns in the same thread as the UI
+            //Toast.makeText(getApplicationContext(), String.valueOf(locationTickCounter), Toast.LENGTH_SHORT).show();
             checkLocation(friendUsername);
+            if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
+                youAreCloser = (currentDist < lastDist) ? true : false;
+                if (currentDist != lastDist) {
+                    displayRing();
+                }
+                lastDist = currentDist;
+                locationTickCounter = 0;
+            }
+
+        }
+    };
+
+    private Runnable hideRing = new Runnable() {
+        public void run() {
+            //This method runs in the same thread as the UI.
+            ringView.animate().alpha(0).setDuration(1000).start();
 
         }
     };
@@ -225,6 +270,10 @@ public class ColorActivity extends AppCompatActivity  {
         int red = 255 - blue;
 
         mainColorDisplay.setBackgroundColor(Color.rgb(red,0,blue));
+    }
+
+    private void setBlankBackground() {
+        mainColorDisplay.setBackgroundColor(getResources().getColor(R.color.background_material_dark));
     }
 
 
@@ -294,6 +343,7 @@ public class ColorActivity extends AppCompatActivity  {
 
                         if (model.getLatitudeTarget() == null && model.getLongitudeTarget() == null) {
                             Toast.makeText(getApplicationContext(), "Target not set!", Toast.LENGTH_SHORT).show();
+                            setBlankBackground();
                             myTimer.cancel();
                         } else {
 
@@ -311,9 +361,6 @@ public class ColorActivity extends AppCompatActivity  {
 
                             }
 
-
-
-
                             double diff = Utils.distFrom(targetLatitude, targetLongitude, latitude, longitude);
                             //distFromTarget.setText("Distance from " + friend + ": " + (int)diff + " meters");
                             //Toast.makeText(getApplicationContext(), "Your lat: " + latitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + longitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_SHORT).show();
@@ -321,20 +368,13 @@ public class ColorActivity extends AppCompatActivity  {
 
                         }
 
-
-
-
                     } else if (model.getStatus().equals("0")) {
 
 
                     } else if (model.getStatus().equals("2")) {
 
                     }
-
-
-
-
-                }
+             }
 
                 @Override
                 public void failure(RetrofitError error) {
@@ -364,15 +404,10 @@ public class ColorActivity extends AppCompatActivity  {
 
             @Override
             public void success(LoginModel model, Response response) {
-
                 if (model.getStatus().equals("1")) {  //setlocation Success
                     Toast.makeText(getApplicationContext(), "Set initial location to " + friend, Toast.LENGTH_SHORT).show();
-
-
                 } else if (model.getStatus().equals("0")) {
-
                 } else if (model.getStatus().equals("2")) {
-
                 }
             }
 
