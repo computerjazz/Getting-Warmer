@@ -17,6 +17,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -63,13 +66,17 @@ public class SignupActivity extends AppCompatActivity {
 
     public void toLoginScreen(View v) {
 
-
         finish();
     }
 
 
-    public void Signup(View v){
 
+
+    public void Signup(View v){
+        String usr = username.getText().toString();
+        String pw = pass.getText().toString();
+        String both = usr.toLowerCase() + pw;
+        String encryptedString = Utils.getEncryptedString(both);
 
         //calling field validation method
         if(CheckFieldValidation()) {
@@ -82,7 +89,7 @@ public class SignupActivity extends AppCompatActivity {
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
             //Calling method to signup
-            restInterface.SignUp(username.getText().toString(), pass.getText().toString(), new Callback<LoginModel>() {
+            restInterface.SignUp(usr, encryptedString, new Callback<LoginModel>() {
 
 
                         @Override

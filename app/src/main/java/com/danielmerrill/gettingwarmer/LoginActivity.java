@@ -63,6 +63,10 @@ public class LoginActivity extends AppCompatActivity {
 
         //Calling method of field validation
         if(CheckFieldValidation()) {
+            String usr = username.getText().toString();
+            String pw = pass.getText().toString();
+            String both = usr.toLowerCase() + pw;
+            String encryptedString = Utils.getEncryptedString(both);
 
             //progressBar.setVisibility(View.VISIBLE);
             //setContentView(R.layout.progressbar_layout);
@@ -73,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
             final RestInterface restInterface = adapter.create(RestInterface.class);
 
             //Calling method to get check login
-            restInterface.Login(username.getText().toString(), pass.getText().toString(), new Callback<LoginModel>() {
+            restInterface.Login(usr, encryptedString, new Callback<LoginModel>() {
                 @Override
                 public void success(LoginModel model, Response response) {
                     String user = username.getText().toString();

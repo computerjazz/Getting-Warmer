@@ -1,5 +1,10 @@
 package com.danielmerrill.gettingwarmer;
 
+import android.widget.Toast;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * Created by danielmerrill on 7/15/16.
  */
@@ -15,5 +20,17 @@ public class Utils {
         double dist =  earthRadius * c;
 
         return dist;
+    }
+
+    public static String getEncryptedString(String s) {
+        String stringToReturn = "";
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(s.getBytes());
+            stringToReturn = new String(messageDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+
+        }
+        return stringToReturn;
     }
 }

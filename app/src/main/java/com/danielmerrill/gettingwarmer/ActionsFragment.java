@@ -450,26 +450,31 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
     }
 
     private void setFriendsList(ArrayList<String> fl) {
+        if (getActivity() != null) {
+            Collections.sort(fl, String.CASE_INSENSITIVE_ORDER);
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                    getActivity(),
+                    R.layout.custom_listitem,
+                    fl);
 
-        Collections.sort(fl, String.CASE_INSENSITIVE_ORDER);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                getActivity(),
-                R.layout.custom_listitem,
-                fl);
+            flv.setAdapter(arrayAdapter);
+        }
 
-        flv.setAdapter(arrayAdapter);
     }
 
     private void setRequestsList(ArrayList<String> rl) {
+        if (getActivity() != null) {
+            Collections.sort(rl, String.CASE_INSENSITIVE_ORDER);
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                    getActivity(),
+                    R.layout.custom_listitem,
+                    rl);
 
-        Collections.sort(rl, String.CASE_INSENSITIVE_ORDER);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                getActivity(),
-                R.layout.custom_listitem,
-                rl);
+            rlv.setAdapter(arrayAdapter);
+            showOrHideRequestsList(rl);
+        }
 
-        rlv.setAdapter(arrayAdapter);
-        showOrHideRequestsList(rl);
+
     }
 
     private void showOrHideRequestsList(List<String> requestList) {
@@ -479,6 +484,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             layout_requests.setVisibility(View.VISIBLE);
         }
     }
+
 
     public void refreshFriendsList() {
 
