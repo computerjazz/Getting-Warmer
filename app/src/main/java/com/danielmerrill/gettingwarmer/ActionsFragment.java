@@ -480,7 +480,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         }
     }
 
-    private void refreshFriendsList() {
+    public void refreshFriendsList() {
 
         setFriendsList(new ArrayList<String>());
         RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
@@ -517,7 +517,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             });
     }
 
-    private void refreshRequestsList() {
+    public void refreshRequestsList() {
 
         setRequestsList(new ArrayList<String>());
 

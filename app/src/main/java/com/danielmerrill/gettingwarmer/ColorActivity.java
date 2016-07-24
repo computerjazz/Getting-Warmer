@@ -50,10 +50,12 @@ public class ColorActivity extends AppCompatActivity  {
     private TextView percentageDisplay;
     private TextView distanceDisplay;
     private TextView initialDisplay;
+    private TextView friendUsernameTitle;
+
     private RelativeLayout mainColorDisplay;
 
     private ImageView ringView;
-    private boolean scaleToggle;
+    private boolean detailViewToggle;
 
     private GPSTracker gps;
 
@@ -91,6 +93,9 @@ public class ColorActivity extends AppCompatActivity  {
         percentageDisplay = (TextView) findViewById(R.id.percentage_display);
         distanceDisplay = (TextView) findViewById(R.id.distance_display);
         initialDisplay = (TextView) findViewById(R.id.initial_display);
+        friendUsernameTitle = (TextView) findViewById(R.id.users_title);
+
+
         mainColorDisplay = (RelativeLayout) findViewById(R.id.main_color_display);
         ringView = (ImageView) findViewById(R.id.ringView);
         locationTickCounter = 0;
@@ -104,7 +109,7 @@ public class ColorActivity extends AppCompatActivity  {
 
         View drawerView = findViewById(R.id.drawer_layout);
         if (drawerView != null && drawerView instanceof DrawerLayout) {
-            mDrawer = (DrawerLayout)drawerView;
+            mDrawer = (DrawerLayout) drawerView;
         }
 
         mFriends.setOnClickListener(new View.OnClickListener() {
@@ -114,12 +119,20 @@ public class ColorActivity extends AppCompatActivity  {
             }
         });
 
-        mainColorDisplay.setOnClickListener(new View.OnClickListener() {
+        friendUsernameTitle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View v) {
-                displayRing();
+            public boolean onLongClick(View v) {
+                int visibility = detailViewToggle ? View.INVISIBLE : View.VISIBLE;
+                detailViewToggle = !detailViewToggle;
+
+                percentageDisplay.setVisibility(visibility);
+                distanceDisplay.setVisibility(visibility);
+                initialDisplay.setVisibility(visibility);
+
+                return false;
             }
         });
+
 
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState == null) {
@@ -212,17 +225,22 @@ public class ColorActivity extends AppCompatActivity  {
             //R uns in the same thread as the UI
             //Toast.makeText(getApplicationContext(), String.valueOf(locationTickCounter), Toast.LENGTH_SHORT).show();
             checkLocation(friendUsername);
-            if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
-                youAreCloser = (currentDist < lastDist) ? true : false;
-                if (currentDist != lastDist) {
-                    displayRing();
-                }
-                lastDist = currentDist;
-                locationTickCounter = 0;
-            }
+            triggerPeriodicUpdates();
 
         }
     };
+
+    private void triggerPeriodicUpdates() {
+        if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
+            youAreCloser = (currentDist < lastDist) ? true : false;
+            if (currentDist != lastDist) {
+                displayRing();
+
+            }
+            lastDist = currentDist;
+            locationTickCounter = 0;
+        }
+    }
 
     private Runnable hideRing = new Runnable() {
         public void run() {
@@ -289,11 +307,13 @@ public class ColorActivity extends AppCompatActivity  {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("friendUsername", friendUsername);
         editor.commit();
-        TextView tv = (TextView) findViewById(R.id.users_title);
-        tv.setText(friendUsername);
+        setupFriendUsername();
+        friendUsernameTitle.setText(friendUsername);
         checkLocation(friendUsername);
+    }
 
-
+    private void setupFriendUsername() {
+        friendUsernameTitle = (TextView) findViewById(R.id.users_title);
     }
 
     private void setCurrentCoordinates(double latitude, double longitude) {
@@ -362,17 +382,12 @@ public class ColorActivity extends AppCompatActivity  {
                             }
 
                             double diff = Utils.distFrom(targetLatitude, targetLongitude, latitude, longitude);
-                            //distFromTarget.setText("Distance from " + friend + ": " + (int)diff + " meters");
-                            //Toast.makeText(getApplicationContext(), "Your lat: " + latitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + longitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_SHORT).show();
                             updateDisplays();
 
                         }
 
                     } else if (model.getStatus().equals("0")) {
-
-
                     } else if (model.getStatus().equals("2")) {
-
                     }
              }
 
