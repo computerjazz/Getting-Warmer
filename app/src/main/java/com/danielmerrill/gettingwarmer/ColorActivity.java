@@ -41,6 +41,7 @@ import retrofit.client.Response;
 public class ColorActivity extends AppCompatActivity  {
 
     private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
+    private int TIME_BETWEEN_TIMER_TICKS = 1000;
 
     private DrawerLayout mDrawer;
 
@@ -191,13 +192,7 @@ public class ColorActivity extends AppCompatActivity  {
     protected void onResume() {
         super.onResume();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        myTimer = new Timer();
-        myTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                TimerMethod();
-            }
-        }, 0, 1000);
+        createAndStartTimer();
     }
 
     @Override
@@ -212,7 +207,15 @@ public class ColorActivity extends AppCompatActivity  {
         super.onDestroy();
     }
 
-
+    private void createAndStartTimer() {
+        myTimer = new Timer();
+        myTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TimerMethod();
+            }
+        }, 0, TIME_BETWEEN_TIMER_TICKS);
+    }
 
     private void TimerMethod()
     {
@@ -310,6 +313,8 @@ public class ColorActivity extends AppCompatActivity  {
         setupFriendUsername();
         friendUsernameTitle.setText(friendUsername);
         checkLocation(friendUsername);
+        myTimer.cancel();
+        createAndStartTimer();
     }
 
     private void setupFriendUsername() {
