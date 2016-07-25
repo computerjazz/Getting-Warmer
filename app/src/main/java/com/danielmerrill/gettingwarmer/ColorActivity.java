@@ -43,6 +43,8 @@ public class ColorActivity extends AppCompatActivity  {
     private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
     private int TIME_BETWEEN_TIMER_TICKS = 1000;
 
+    private ActionsFragment actionsFragment;
+
     private DrawerLayout mDrawer;
 
     private Timer myTimer;
@@ -137,7 +139,7 @@ public class ColorActivity extends AppCompatActivity  {
 
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState == null) {
-                ActionsFragment actionsFragment = new ActionsFragment();
+                actionsFragment = new ActionsFragment();
                 actionsFragment.setArguments(getIntent().getExtras());
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.fragment_container, actionsFragment).commit();
@@ -192,6 +194,9 @@ public class ColorActivity extends AppCompatActivity  {
     protected void onResume() {
         super.onResume();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (myTimer != null) {
+            myTimer.cancel();
+        }
         createAndStartTimer();
     }
 
@@ -230,6 +235,7 @@ public class ColorActivity extends AppCompatActivity  {
             checkLocation(friendUsername);
             triggerPeriodicUpdates();
 
+
         }
     };
 
@@ -242,6 +248,14 @@ public class ColorActivity extends AppCompatActivity  {
             }
             lastDist = currentDist;
             locationTickCounter = 0;
+            refreshFriendsLists();
+
+        }
+    }
+
+    private void refreshFriendsLists() {
+        if (actionsFragment != null) {
+            actionsFragment.refresh();
         }
     }
 
@@ -313,7 +327,10 @@ public class ColorActivity extends AppCompatActivity  {
         setupFriendUsername();
         friendUsernameTitle.setText(friendUsername);
         checkLocation(friendUsername);
-        myTimer.cancel();
+        if (myTimer != null) {
+            myTimer.cancel();
+        }
+
         createAndStartTimer();
     }
 
@@ -340,8 +357,6 @@ public class ColorActivity extends AppCompatActivity  {
     public double getInitialDistance() {
         return Utils.distFrom(initialLatitude, initialLongitude, targetLatitude, targetLongitude);
     }
-
-
 
     private void checkLocation(String friendUsername) {
         final String friend = friendUsername;

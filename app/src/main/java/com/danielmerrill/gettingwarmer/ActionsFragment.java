@@ -45,7 +45,10 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
     private TextView friendListTitle;
     private NoScrollListView friendsListView;
     private String username;
+
     private ArrayList<String> friendsList;
+    private ArrayList<String> requestsList;
+
     private  int ANIMATION_DURATION = 200;
     private DrawerLayout mDrawerLayout;
     private ColorActivity colorActivity;
@@ -72,6 +75,11 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
         addFriendIcon = (AppCompatButton) v.findViewById(R.id.btn_addfriendIcon);
         layout_requests = (LinearLayout) v.findViewById(R.id.layout_requests);
+
+        friendsList = new ArrayList<String>();
+        requestsList = new ArrayList<String>();
+        setRequestsList(new ArrayList<String>());
+        setFriendsList(new ArrayList<String>());
 
         colorActivity = (ColorActivity) getActivity();
 
@@ -133,19 +141,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        /*
-        friendListTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (friendsListView.getVisibility() != View.VISIBLE) {
-                    friendsListView.setVisibility(View.VISIBLE);
-                } else {
-                    friendsListView.setVisibility(View.GONE);
-                }
-            }
-        });
-        */
 
         closeDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -308,10 +303,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         }
     }
 
-
-
-
-    public void refresh(View v) {
+    public void refresh() {
         refreshFriendsList();
         refreshRequestsList();
     }
@@ -392,6 +384,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
 
                     if (model.getStatus().equals("1")) {  //AddFriend Success
+
                         refreshFriendsList();
                         Toast.makeText(getActivity().getApplicationContext(), "Sent a friend request to " + friendUserName, Toast.LENGTH_SHORT).show();
                         friendUserName_input.setText("");
@@ -451,7 +444,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     private void setFriendsList(ArrayList<String> fl) {
         if (getActivity() != null) {
-            Collections.sort(fl, String.CASE_INSENSITIVE_ORDER);
+
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                     getActivity(),
                     R.layout.custom_listitem,
@@ -464,7 +457,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     private void setRequestsList(ArrayList<String> rl) {
         if (getActivity() != null) {
-            Collections.sort(rl, String.CASE_INSENSITIVE_ORDER);
+
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                     getActivity(),
                     R.layout.custom_listitem,
@@ -488,7 +481,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     public void refreshFriendsList() {
 
-        setFriendsList(new ArrayList<String>());
+
         RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
 
         //Creating Rest Services
@@ -504,7 +497,12 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
                     if (model.getStatus().equals("1")) {  //get friends Success
                         ArrayList<String> friends = (ArrayList<String>) model.getFriends();
-                        setFriendsList(friends);
+                        Collections.sort(friends, String.CASE_INSENSITIVE_ORDER);
+                        if (!friends.equals(friendsList)) {
+                            setFriendsList(friends);
+                            friendsList = friends;
+                        }
+
 
                     } else if (model.getStatus().equals("2")) { // database error
 
@@ -525,8 +523,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     public void refreshRequestsList() {
 
-        setRequestsList(new ArrayList<String>());
-
         RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
 
         //Creating Rest Services
@@ -540,8 +536,13 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
                 if (model.getStatus().equals("1")) {  //get friend requests Success
                     ArrayList<String> requests = (ArrayList<String>) model.getRequests();
-                    //Toast.makeText(Homepage.this, "Got " + friends.size() + " friends: " + friends.get(0), Toast.LENGTH_SHORT).show();
-                    setRequestsList(requests);
+                    Collections.sort(requests, String.CASE_INSENSITIVE_ORDER);
+                    //Toast.makeText(getActivity().getApplicationContext(), "Got: " + requests.size() + " Had: " + requestsList.size(), Toast.LENGTH_SHORT).show();
+                    if (!requests.equals(requestsList)) {
+                        requestsList = requests;
+                        setRequestsList(requests);
+                    }
+
 
                 } else if (model.getStatus().equals("2")) { // database error
 
