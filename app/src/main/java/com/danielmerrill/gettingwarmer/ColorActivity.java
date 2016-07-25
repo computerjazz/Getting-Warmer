@@ -46,7 +46,7 @@ public class ColorActivity extends AppCompatActivity  {
 
     private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
     private int TIME_BETWEEN_TIMER_TICKS = 1000;
-    private int WIN_DISTANCE = 8;
+    private int WIN_DISTANCE = 5;
 
     private ActionsFragment actionsFragment;
 
@@ -259,24 +259,31 @@ public class ColorActivity extends AppCompatActivity  {
         }
     }
 
-    private void checkWinCondition() {
+    private boolean checkWinCondition() {
         if (currentDist < WIN_DISTANCE) {
-            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-            int dot = 200;      // Length of a Morse Code "dot" in milliseconds
-            int dash = 500;     // Length of a Morse Code "dash" in milliseconds
-            int short_gap = 200;    // Length of Gap Between dots/dashes
-            int medium_gap = 500;   // Length of Gap Between Letters
-            int long_gap = 1000;    // Length of Gap Between Words
-            long[] pattern = {
-                    0,  // Start immediately
-                    dot, short_gap, dot, short_gap, dot    // s
-
-            };
-            v.vibrate(pattern, -1);
+            vibrateOnFire();
             winMessage.setVisibility(View.VISIBLE);
-            isInGame = false;
+            return true;
+        } else {
+            winMessage.setVisibility(View.INVISIBLE);
+            return false;
         }
+    }
+
+    private void vibrateOnFire() {
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        int dot = 200;      // Length of a Morse Code "dot" in milliseconds
+        int dash = 500;     // Length of a Morse Code "dash" in milliseconds
+        int short_gap = 200;    // Length of Gap Between dots/dashes
+        int medium_gap = 500;   // Length of Gap Between Letters
+        int long_gap = 1000;    // Length of Gap Between Words
+        long[] pattern = {
+                0,  // Start immediately
+                dot, short_gap, dot, short_gap, dot    // s
+
+        };
+        v.vibrate(pattern, -1);
     }
 
     private void checkIfCloserAndDisplayRing() {
