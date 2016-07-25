@@ -59,6 +59,7 @@ public class ColorActivity extends AppCompatActivity  {
 
     private ImageView ringView;
     private boolean detailViewToggle;
+    private boolean isInGame;
 
     private GPSTracker gps;
 
@@ -232,25 +233,32 @@ public class ColorActivity extends AppCompatActivity  {
         public void run() {
             //R uns in the same thread as the UI
             //Toast.makeText(getApplicationContext(), String.valueOf(locationTickCounter), Toast.LENGTH_SHORT).show();
-            checkLocation(friendUsername);
+            if (isInGame) {
+                checkLocation(friendUsername);
+            }
+
             triggerPeriodicUpdates();
-
-
         }
     };
 
     private void triggerPeriodicUpdates() {
         if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
-            youAreCloser = (currentDist < lastDist) ? true : false;
-            if (currentDist != lastDist) {
-                displayRing();
-
+            if (isInGame) {
+                checkIfCloserAndDisplayRing();
             }
-            lastDist = currentDist;
-            locationTickCounter = 0;
+
             refreshFriendsLists();
+            locationTickCounter = 0;
+        }
+    }
+
+    private void checkIfCloserAndDisplayRing() {
+        youAreCloser = (currentDist < lastDist) ? true : false;
+        if (currentDist != lastDist) {
+            displayRing();
 
         }
+        lastDist = currentDist;
     }
 
     private void refreshFriendsLists() {
@@ -324,6 +332,8 @@ public class ColorActivity extends AppCompatActivity  {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("friendUsername", friendUsername);
         editor.commit();
+        isInGame = true;
+
         setupFriendUsername();
         friendUsernameTitle.setText(friendUsername);
         checkLocation(friendUsername);
@@ -384,7 +394,7 @@ public class ColorActivity extends AppCompatActivity  {
                         if (model.getLatitudeTarget() == null && model.getLongitudeTarget() == null) {
                             Toast.makeText(getApplicationContext(), "Target not set!", Toast.LENGTH_SHORT).show();
                             setBlankBackground();
-                            myTimer.cancel();
+                            isInGame = false;
                         } else {
 
                             targetLatitude = Double.parseDouble(model.getLatitudeTarget());
