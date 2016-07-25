@@ -5,6 +5,7 @@ import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +32,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -42,6 +46,7 @@ public class ColorActivity extends AppCompatActivity  {
 
     private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
     private int TIME_BETWEEN_TIMER_TICKS = 1000;
+    private int WIN_DISTANCE = 8;
 
     private ActionsFragment actionsFragment;
 
@@ -54,6 +59,7 @@ public class ColorActivity extends AppCompatActivity  {
     private TextView distanceDisplay;
     private TextView initialDisplay;
     private TextView friendUsernameTitle;
+    private TextView winMessage;
 
     private RelativeLayout mainColorDisplay;
 
@@ -98,13 +104,13 @@ public class ColorActivity extends AppCompatActivity  {
         distanceDisplay = (TextView) findViewById(R.id.distance_display);
         initialDisplay = (TextView) findViewById(R.id.initial_display);
         friendUsernameTitle = (TextView) findViewById(R.id.users_title);
-
+        winMessage = (TextView) findViewById(R.id.win);
 
         mainColorDisplay = (RelativeLayout) findViewById(R.id.main_color_display);
         ringView = (ImageView) findViewById(R.id.ringView);
         locationTickCounter = 0;
 
-
+        winMessage.setVisibility(View.INVISIBLE);
 
 
         // Check that the activity is using the layout version with
@@ -245,10 +251,31 @@ public class ColorActivity extends AppCompatActivity  {
         if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
             if (isInGame) {
                 checkIfCloserAndDisplayRing();
+                checkWinCondition();
             }
 
             refreshFriendsLists();
             locationTickCounter = 0;
+        }
+    }
+
+    private void checkWinCondition() {
+        if (currentDist < WIN_DISTANCE) {
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+            int dot = 200;      // Length of a Morse Code "dot" in milliseconds
+            int dash = 500;     // Length of a Morse Code "dash" in milliseconds
+            int short_gap = 200;    // Length of Gap Between dots/dashes
+            int medium_gap = 500;   // Length of Gap Between Letters
+            int long_gap = 1000;    // Length of Gap Between Words
+            long[] pattern = {
+                    0,  // Start immediately
+                    dot, short_gap, dot, short_gap, dot    // s
+
+            };
+            v.vibrate(pattern, -1);
+            winMessage.setVisibility(View.VISIBLE);
+            isInGame = false;
         }
     }
 
@@ -333,6 +360,8 @@ public class ColorActivity extends AppCompatActivity  {
         editor.putString("friendUsername", friendUsername);
         editor.commit();
         isInGame = true;
+        winMessage = (TextView) findViewById(R.id.win);
+        winMessage.setVisibility(View.INVISIBLE);
 
         setupFriendUsername();
         friendUsernameTitle.setText(friendUsername);
