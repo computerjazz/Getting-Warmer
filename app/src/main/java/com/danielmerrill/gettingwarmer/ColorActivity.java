@@ -110,7 +110,7 @@ public class ColorActivity extends AppCompatActivity  {
         ringView = (ImageView) findViewById(R.id.ringView);
         locationTickCounter = 0;
 
-        winMessage.setVisibility(View.INVISIBLE);
+        reset();
 
 
         // Check that the activity is using the layout version with
@@ -160,41 +160,12 @@ public class ColorActivity extends AppCompatActivity  {
         } else {
             ringView.getDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.MULTIPLY);
         }
-
+        // to avoid pixellation, ring is created full-screen
+        // then scaled-down before the animation expands it
         ringView.setScaleX(.1f);
         ringView.setScaleY(.1f);
         ringView.setAlpha(1f);
         ringView.animate().scaleX(4).scaleY(4).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(1500).withEndAction(hideRing).start();
-
-                /*
-                final ShapeDrawable circle = new ShapeDrawable(new OvalShape());
-                circle.setIntrinsicWidth (20);
-                circle.setIntrinsicHeight (20);
-                circle.getPaint().setStyle(Paint.Style.STROKE);
-                circle.getPaint().setColor(getResources().getColor(R.color.white));
-                circle.getPaint().setStrokeWidth(5.0f);
-
-                ValueAnimator animation = ValueAnimator.ofFloat(0.0f,1.0f);
-                animation.setDuration(1500);
-
-                animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        Float tickValue = (Float)animation.getAnimatedValue();
-                        int padding = (int)(tickValue*100);
-                        int sideLength = (int)(tickValue*3000);
-
-                        ringView.getLayoutParams().height = sideLength;
-                        ringView.getLayoutParams().width = sideLength;
-
-
-                        ringView.setImageDrawable(circle);
-                        percentageDisplay.setText(animation.getAnimatedValue().toString());
-                    }
-                });
-
-                animation.start();
-                */
     }
 
     @Override
@@ -241,8 +212,8 @@ public class ColorActivity extends AppCompatActivity  {
             //Toast.makeText(getApplicationContext(), String.valueOf(locationTickCounter), Toast.LENGTH_SHORT).show();
             if (isInGame) {
                 checkLocation(friendUsername);
+                checkWinCondition();
             }
-
             triggerPeriodicUpdates();
         }
     };
@@ -251,7 +222,7 @@ public class ColorActivity extends AppCompatActivity  {
         if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
             if (isInGame) {
                 checkIfCloserAndDisplayRing();
-                checkWinCondition();
+
             }
 
             refreshFriendsLists();
@@ -287,7 +258,7 @@ public class ColorActivity extends AppCompatActivity  {
     }
 
     private void checkIfCloserAndDisplayRing() {
-        youAreCloser = (currentDist < lastDist) ? true : false;
+        youAreCloser = currentDist < lastDist;
         if (currentDist != lastDist) {
             displayRing();
 
@@ -331,10 +302,6 @@ public class ColorActivity extends AppCompatActivity  {
     }
 
 
-
-
-
-
     private void updateDisplays() {
         percentageDisplay.setText(String.valueOf(getPercentageComplete() + "%"));
         distanceDisplay.setText(String.valueOf((int) getCurrentDistance() + "m"));
@@ -350,7 +317,9 @@ public class ColorActivity extends AppCompatActivity  {
     }
 
     private void setBlankBackground() {
+        winMessage.setVisibility(View.INVISIBLE);
         mainColorDisplay.setBackgroundColor(getResources().getColor(R.color.background_material_dark));
+
     }
 
 
@@ -366,18 +335,16 @@ public class ColorActivity extends AppCompatActivity  {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("friendUsername", friendUsername);
         editor.commit();
-        isInGame = true;
-        winMessage = (TextView) findViewById(R.id.win);
-        winMessage.setVisibility(View.INVISIBLE);
-
         setupFriendUsername();
         friendUsernameTitle.setText(friendUsername);
         checkLocation(friendUsername);
         if (myTimer != null) {
             myTimer.cancel();
+            myTimer = null;
         }
 
         createAndStartTimer();
+
     }
 
     private void setupFriendUsername() {
@@ -429,9 +396,10 @@ public class ColorActivity extends AppCompatActivity  {
 
                         if (model.getLatitudeTarget() == null && model.getLongitudeTarget() == null) {
                             Toast.makeText(getApplicationContext(), "Target not set!", Toast.LENGTH_SHORT).show();
-                            setBlankBackground();
-                            isInGame = false;
+                            reset();
                         } else {
+
+                            isInGame = true;
 
                             targetLatitude = Double.parseDouble(model.getLatitudeTarget());
                             targetLongitude = Double.parseDouble(model.getLongitudeTarget());
@@ -500,6 +468,14 @@ public class ColorActivity extends AppCompatActivity  {
             }
         });
         // Toast.makeText(getActivity().getApplicationContext(), "Setting location - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+    }
+
+    public void reset() {
+        isInGame = false;
+        setBlankBackground();
+        if (myTimer != null) {
+            myTimer.cancel();
+        }
     }
 
     // when logout button is clicked

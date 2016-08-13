@@ -1,10 +1,12 @@
 package com.danielmerrill.gettingwarmer;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -45,6 +47,8 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
     private TextView friendListTitle;
     private NoScrollListView friendsListView;
     private String username;
+    private boolean hasLocation;
+    private boolean isNewLocation;
 
     private ArrayList<String> friendsList;
     private ArrayList<String> requestsList;
@@ -54,12 +58,16 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
     private ColorActivity colorActivity;
     private double targetLatitude;
     private double targetLongitude;
+    private UsernameValidator usernameValidator;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_actions, container, false);
+
+        hasLocation = false;
+        isNewLocation = false;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         username = prefs.getString("username", "");
@@ -75,6 +83,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
         addFriendIcon = (AppCompatButton) v.findViewById(R.id.btn_addfriendIcon);
         layout_requests = (LinearLayout) v.findViewById(R.id.layout_requests);
+        usernameValidator = new UsernameValidator();
 
         friendsList = new ArrayList<String>();
         requestsList = new ArrayList<String>();
@@ -106,24 +115,69 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             public void onItemClick(AdapterView<?> parent, View view,int position, long id)
             {
 
-                String selectedFromList = (rlv.getItemAtPosition(position).toString());
-                //deleteCell(view, position); // comment to disable animations
-                acceptFriend(selectedFromList);
+                final String selectedFromList = (rlv.getItemAtPosition(position).toString());
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(selectedFromList + " wants to be your friend");
+                builder.setCancelable(true);
+
+                builder.setPositiveButton(
+                        "Accept",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                acceptFriend(selectedFromList);
+                                dialog.cancel();
+                            }
+                        });
+
+                builder.setNegativeButton(
+                        "Deny",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                deleteRelationship(selectedFromList);
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
             }
         });
 
         flv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // get location info
-                // create class object
-                final String friend = flv.getItemAtPosition(position).toString();
-                //checkLocation(friend);
-                colorActivity.setFriendUsername(friend);
-                //colorActivity.setTargetLocation(targetLatitude, targetLongitude);
-                mDrawerLayout.closeDrawers();
 
+                final String friend = flv.getItemAtPosition(position).toString();
+
+
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(friend);
+                builder.setCancelable(true);
+
+                builder.setPositiveButton(
+                        "Load Location",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                colorActivity.reset();
+                                colorActivity.setFriendUsername(friend);
+                                dialog.cancel();
+                                mDrawerLayout.closeDrawers();
+                            }
+                        });
+
+                builder.setNegativeButton(
+                        "Send Your Location",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                sendLocation(friend);
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
             }
         });
 
@@ -136,7 +190,31 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 // get location info
                 // create class object
                 final String friend = flv.getItemAtPosition(pos).toString();
-                sendLocation(friend);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Remove " + friend + "?");
+                builder.setCancelable(true);
+
+                builder.setPositiveButton(
+                        "Remove",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                deleteRelationship(friend);
+                                dialog.cancel();
+                            }
+                        });
+
+                builder.setNegativeButton(
+                        "Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+
                 return true;
             }
         });
@@ -145,7 +223,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         closeDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 mDrawerLayout.closeDrawers();
             }
         });
@@ -161,99 +238,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     }
 
-    private void setInitialLocation(String friendUsername, double targetLatitude, double targetLongitude, double currentLatitude, double currentLongitude) {
-
-        final String friend = friendUsername;
-
-        //Creating Rest Services
-        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
-        final RestInterface restInterface = adapter.create(RestInterface.class);
-
-        //Calling method
-        restInterface.setLocation(username, friend, targetLatitude, targetLongitude, currentLatitude, currentLongitude, new Callback<LoginModel>() {
-
-            @Override
-            public void success(LoginModel model, Response response) {
-
-                if (model.getStatus().equals("1")) {  //setlocation Success
-                    //Toast.makeText(getActivity().getApplicationContext(), "Set location to " + friend, Toast.LENGTH_SHORT).show();
-
-
-                } else if (model.getStatus().equals("0")) {
-
-                } else if (model.getStatus().equals("2")) {
-
-                }
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-                String merror = error.getMessage();
-                Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-
-
-    private void checkLocation(final String friendUsername) {
-        final String friend = friendUsername;
-        gps = new GPSTracker(getActivity());
-
-        // check if GPS enabled
-        if(gps.canGetLocation()){
-
-            final double currentLatitude = gps.getLatitude();
-            final double currentLongitude = gps.getLongitude();
-
-            //Creating Rest Services
-            RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
-            final RestInterface restInterface = adapter.create(RestInterface.class);
-
-            //Calling method
-            restInterface.getLocation(username, friend, new Callback<LoginModel>() {
-
-                @Override
-                public void success(LoginModel model, Response response) {
-
-                    if (model.getStatus().equals("1")) {  //getlocation Success
-
-                        targetLatitude = Double.parseDouble(model.getLatitudeTarget());
-                        targetLongitude = Double.parseDouble(model.getLongitudeTarget());
-
-                        if (model.getIsNew().equals("1")) { // check if location is new
-                            Toast.makeText(getActivity().getApplicationContext(), "New pin detected!", Toast.LENGTH_SHORT).show();
-                            setInitialLocation(friendUsername, targetLatitude, targetLongitude, currentLatitude, currentLongitude);
-                        }
-
-                        double diff = Utils.distFrom(targetLatitude, targetLongitude, currentLatitude, currentLongitude);
-                        distFromTarget.setText("Distance from " + friend + ": " + (int)diff + " meters");
-                        //Toast.makeText(getActivity().getApplicationContext(), "Your lat: " + currentLatitude + "\nTarget lat: " + targetLatitude + "\nYour lng:" + currentLongitude + "\nTarget lng: " + targetLongitude +  "\nOff by " + diff + " meters", Toast.LENGTH_LONG).show();
-
-
-                    } else if (model.getStatus().equals("0")) {
-
-
-                    } else if (model.getStatus().equals("2")) {
-
-                    }
-                }
-
-                @Override
-                public void failure(RetrofitError error) {
-
-                    String merror = error.getMessage();
-                    Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
-                }
-            });
-        }else{
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-            gps.showSettingsAlert();
-        }
-    }
 
     // Set location of friend with username 'f'
     private void sendLocation(String friendUsername) {
@@ -308,6 +292,93 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         refreshRequestsList();
     }
 
+    //TODO
+    private boolean isLocationSet(String friendName) {
+
+        boolean locationSet = false;
+        //Creating Rest Services
+
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+        final RestInterface restInterface = adapter.create(RestInterface.class);
+
+        //Calling method
+        restInterface.getLocation(username, friendName, new Callback<LoginModel>() {
+
+            @Override
+            public void success(LoginModel model, Response response) {
+
+                if (model.getStatus().equals("1")) {  //getlocation Success
+
+                    if (model.getLatitudeTarget() == null && model.getLongitudeTarget() == null) {
+                        hasLocation = false;
+                    } else {
+                        hasLocation = true;
+                        if (model.getIsNew().equals("1")) { // check if location is new
+                            isNewLocation = true;
+
+                        } else {
+                            isNewLocation = false;
+
+                        }
+                    }
+
+                } else if (model.getStatus().equals("0")) {
+                } else if (model.getStatus().equals("2")) {
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                String merror = error.getMessage();
+                Toast.makeText(getActivity(), merror, Toast.LENGTH_SHORT).show();
+            }
+        });
+        return hasLocation;
+    }
+
+
+
+
+
+    private void deleteRelationship(String friendName) {
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+        final String friend = friendName;
+
+        //Creating Rest Services
+        final RestInterface restInterface = adapter.create(RestInterface.class);
+
+        //Calling method to signup
+        restInterface.deleteRelationship(username, friend, new Callback<LoginModel>() {
+
+            @Override
+            public void success(LoginModel model, Response response) {
+
+                if (model.getStatus().equals("1")) {  //Delete relationship Success
+                    refreshFriendsList();
+                    Toast.makeText(getActivity().getApplicationContext(), "Removed " + friend, Toast.LENGTH_SHORT).show();
+
+
+                } else if (model.getStatus().equals("0")) { // Friend add failure
+
+
+                    Toast.makeText(getActivity().getApplicationContext(), friend + " does not exist", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                String merror = error.getMessage();
+                Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    //TODO
+    private void checkForNewPins() {
+
+    }
+
 
 
     public void acceptFriend(String friendName) {
@@ -329,29 +400,29 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                         Toast.makeText(getActivity().getApplicationContext(), "Accepted friend request from " + friend, Toast.LENGTH_SHORT).show();
                         
 
-                    } else if (model.getStatus().equals("0"))  // Friend add failure
-                    {
+                    } else if (model.getStatus().equals("0")) { // Friend add failure
+
 
                         Toast.makeText(getActivity().getApplicationContext(), friend + " does not exist", Toast.LENGTH_SHORT).show();
-                    }else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
+                    } else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
                         refreshFriendsList();
                         refreshRequestsList();
                         // hide keyboard
 
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+                        if (getActivity().getCurrentFocus() != null) {
+                            imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+                        }
+
                         Toast.makeText(getActivity(), "Now friends with " + friend, Toast.LENGTH_SHORT).show();
 
-                    }else if (model.getStatus().equals("4")) { // already sent request
-                        // hide keyboard
-
+                    } else if (model.getStatus().equals("4")) { // already sent request
                         Toast.makeText(getActivity().getApplicationContext(), "Request to " + friend + " already sent", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-
                     String merror = error.getMessage();
                     Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
                 }
@@ -394,21 +465,26 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                         imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
 
 
-                    } else if (model.getStatus().equals("0"))  // Friend add failure
-                    {
+                    } else if (model.getStatus().equals("0")) {  // Friend add failure
+
                         Animation shake = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.shake);
                         friendUserName_input.startAnimation(shake);
                         Toast.makeText(getActivity().getApplicationContext(), friendUserName + " does not exist", Toast.LENGTH_SHORT).show();
-                    }else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
+
+                    } else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add to friends
+
                         refreshFriendsList();
                         refreshRequestsList();
-                        // hide keyboard
+
                         friendUserName_input.setText("");
+
+                        // hide keyboard
                         InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+
                         Toast.makeText(getActivity().getApplicationContext(), "Now friends with " + friendUserName, Toast.LENGTH_SHORT).show();
 
-                    }else if (model.getStatus().equals("4")) { // already sent request
+                    } else if (model.getStatus().equals("4")) { // already sent request
                         // hide keyboard
                         friendUserName_input.setText("");
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -434,12 +510,10 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     //checking field are empty
     private boolean isValid(String s, EditText e){
-        boolean valid=true;
         if(s.equals("")) {
             e.setError("There's nothing here!");
-            valid = false;
         }
-        return valid;
+        return usernameValidator.validate(s);
     }
 
     private void setFriendsList(ArrayList<String> fl) {
@@ -481,16 +555,13 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     public void refreshFriendsList() {
 
-
         RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
 
         //Creating Rest Services
         final RestInterface restInterface = adapter.create(RestInterface.class);
 
-
         //Calling method to get friends list
             restInterface.getFriends(username, new Callback<LoginModel>() {
-
 
                 @Override
                 public void success(LoginModel model, Response response) {
@@ -508,8 +579,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
                         Toast.makeText(getActivity().getApplicationContext(), "Couldn't get friends", Toast.LENGTH_SHORT).show();
                     }
-
-
                 }
 
                 @Override
@@ -557,55 +626,4 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             }
         });
     }
-
-
-
-    /* Requests list animation
-
-    private void deleteCell(final View v, final int index) {
-        AnimationListener al = new AnimationListener() {
-            @Override
-            public void onAnimationEnd(Animation arg0) {
-                //rlv.remove(index);
-
-                //ViewHolder vh = (ViewHolder)v.getTag();
-                //vh.needInflate = true;
-
-                //mMyAnimListAdapter.notifyDataSetChanged();
-            }
-            @Override public void onAnimationRepeat(Animation animation) {}
-            @Override public void onAnimationStart(Animation animation) {}
-        };
-
-        collapse(v, al);
-    }
-
-    private void collapse(final View v, AnimationListener al) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation anim = new Animation() {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if (interpolatedTime == 1) {
-                    v.setVisibility(View.GONE);
-                }
-                else {
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        if (al!=null) {
-            anim.setAnimationListener(al);
-        }
-        anim.setDuration(ANIMATION_DURATION);
-        v.startAnimation(anim);
-    }
-    */
 }

@@ -39,6 +39,12 @@ public interface RestInterface {
                    Callback<LoginModel> pm);
 
     @FormUrlEncoded
+    @POST("/deleterelationship")
+    void deleteRelationship(@Field("username") String username,
+                       @Field("friendUsername") String friendUsername,
+                       Callback<LoginModel> pm);
+
+    @FormUrlEncoded
     @POST("/getfriends")
     void getFriends(@Field("username") String username,
                     Callback<LoginModel> cb);
