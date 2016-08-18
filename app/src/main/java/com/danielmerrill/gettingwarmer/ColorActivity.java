@@ -47,6 +47,8 @@ public class ColorActivity extends AppCompatActivity  {
     private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
     private int TIME_BETWEEN_TIMER_TICKS = 1000;
     private int WIN_DISTANCE = 5;
+    private int MAX_COLOR_RANGE = 195;
+    private int MIN_COLOR_VALUE = 60;
 
     private ActionsFragment actionsFragment;
 
@@ -90,14 +92,25 @@ public class ColorActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color);
 
-
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         username = prefs.getString("username", "");
+
+
+        if (username.length() == 0) {
+            finish();
+            Intent i = new Intent(ColorActivity.this, LoginActivity.class);
+            startActivity(i);
+
+        }
+
         friendUsername = prefs.getString("friendUsername", "");
         if (friendUsername.length() > 0) {
             setFriendUsername(friendUsername);
         }
+
+
+
+
 
         mFriends = (ImageView) findViewById(R.id.friendsIcon);
         percentageDisplay = (TextView) findViewById(R.id.percentage_display);
@@ -156,9 +169,9 @@ public class ColorActivity extends AppCompatActivity  {
 
     private void displayRing() {
         if (youAreCloser) {
-            ringView.getDrawable().setColorFilter(Color.MAGENTA, PorterDuff.Mode.MULTIPLY);
+            ringView.getDrawable().setColorFilter(getResources().getColor(R.color.warmer), PorterDuff.Mode.MULTIPLY);
         } else {
-            ringView.getDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.MULTIPLY);
+            ringView.getDrawable().setColorFilter(getResources().getColor(R.color.colder), PorterDuff.Mode.MULTIPLY);
         }
         // to avoid pixellation, ring is created full-screen
         // then scaled-down before the animation expands it
@@ -306,14 +319,18 @@ public class ColorActivity extends AppCompatActivity  {
         percentageDisplay.setText(String.valueOf(getPercentageComplete() + "%"));
         distanceDisplay.setText(String.valueOf((int) getCurrentDistance() + "m"));
         initialDisplay.setText(String.valueOf((int) getInitialDistance() + "m"));
-        int blue = (int) ((getPercentageComplete()/100.0) * 255);
-        if (blue > 255) {
-            blue = 255;
-        }
 
-        int red = 255 - blue;
 
-        mainColorDisplay.setBackgroundColor(Color.rgb(red,0,blue));
+        // map colors from range 0 - MAX
+        int red = (int) ((getPercentageComplete()/100.0) * MAX_COLOR_RANGE);
+        int blue = MAX_COLOR_RANGE - red;
+
+        // shift into range 60 < color < 255
+        blue = blue + MIN_COLOR_VALUE;
+        red = red + MIN_COLOR_VALUE;
+
+
+        mainColorDisplay.setBackgroundColor(Color.rgb(red,70,blue));
     }
 
     private void setBlankBackground() {
@@ -356,11 +373,17 @@ public class ColorActivity extends AppCompatActivity  {
         currentLongitude = longitude;
     }
 
+    // Returns an int from 0 - 100 that represents the current percentage of the distance covered
+    // based on the initial distance set
     public int getPercentageComplete() {
-
         initialDist = Utils.distFrom(initialLatitude, initialLongitude, targetLatitude, targetLongitude);
         currentDist = Utils.distFrom(currentLatitude, currentLongitude, targetLatitude, targetLongitude);
-        return (int) ((currentDist/initialDist) * 100);
+        int percentageRemaining = (int) ((currentDist/initialDist) * 100);
+        if (percentageRemaining > 100) {
+            percentageRemaining = 100;
+        }
+        int percentageComplete = 100 - percentageRemaining;
+        return percentageComplete;
     }
 
     public double getCurrentDistance() {

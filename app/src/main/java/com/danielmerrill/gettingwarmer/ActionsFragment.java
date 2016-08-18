@@ -85,8 +85,8 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         layout_requests = (LinearLayout) v.findViewById(R.id.layout_requests);
         usernameValidator = new UsernameValidator();
 
-        friendsList = new ArrayList<String>();
-        requestsList = new ArrayList<String>();
+        friendsList = new ArrayList<>();
+        requestsList = new ArrayList<>();
         setRequestsList(new ArrayList<String>());
         setFriendsList(new ArrayList<String>());
 
@@ -118,8 +118,11 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 final String selectedFromList = (rlv.getItemAtPosition(position).toString());
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("FRIEND REQUEST");
                 builder.setMessage(selectedFromList + " wants to be your friend");
                 builder.setCancelable(true);
+                builder.setIcon(R.drawable.ic_account_circle_grey_24dp);
+                builder.setTitle(selectedFromList.toUpperCase());
 
                 builder.setPositiveButton(
                         "Accept",
@@ -153,11 +156,14 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(friend);
+
+                builder.setTitle(friend.toUpperCase());
                 builder.setCancelable(true);
+                builder.setIcon(R.drawable.ic_person_pin_circle_grey_24dp);
+                builder.setMessage("Sending your location will overwrite any past locations sent to " + friend);
 
                 builder.setPositiveButton(
-                        "Load Location",
+                        "Find " + friend,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 colorActivity.reset();
@@ -192,8 +198,10 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 final String friend = flv.getItemAtPosition(pos).toString();
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Remove " + friend + "?");
+                builder.setTitle("UNFRIEND");
+                builder.setMessage("Remove " + friend + " from your friends?");
                 builder.setCancelable(true);
+                builder.setIcon(R.drawable.ic_delete_grey_24dp);
 
                 builder.setPositiveButton(
                         "Remove",
@@ -261,7 +269,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 public void success(LoginModel model, Response response) {
 
                     if (model.getStatus().equals("1")) {  //setlocation Success
-                        Toast.makeText(getActivity().getApplicationContext(), "Sent pin to " + friend, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "Sent your current location to " + friend, Toast.LENGTH_SHORT).show();
 
 
                     } else if (model.getStatus().equals("0")) {
@@ -354,7 +362,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             public void success(LoginModel model, Response response) {
 
                 if (model.getStatus().equals("1")) {  //Delete relationship Success
-                    refreshFriendsList();
+                    refresh();
                     Toast.makeText(getActivity().getApplicationContext(), "Removed " + friend, Toast.LENGTH_SHORT).show();
 
 

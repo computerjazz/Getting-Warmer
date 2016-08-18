@@ -30,8 +30,9 @@ import retrofit.client.Response;
  */
 public class SignupActivity extends AppCompatActivity {
 
-    EditText pass,username;
-    int activityResult;
+    private EditText pass,username;
+    private int activityResult;
+    private UsernameValidator usernameValidator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,8 @@ public class SignupActivity extends AppCompatActivity {
 
         pass=(EditText)findViewById(R.id.input_password);
         username=(EditText)findViewById(R.id.input_username);
+
+        usernameValidator = new UsernameValidator();
 
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -139,14 +142,20 @@ public class SignupActivity extends AppCompatActivity {
 
     //checking field are empty
     private boolean CheckFieldValidation(){
+        String un = username.getText().toString();
+        String pw = pass.getText().toString();
 
-        boolean valid=true;
+        boolean valid = usernameValidator.validate(un) && usernameValidator.validate(pw);
         if(username.getText().toString().equals("")){
             username.setError("Can't be Empty");
             valid=false;
         }else if(pass.getText().toString().equals("")){
             pass.setError("Can't be Empty");
             valid=false;
+        }
+
+        if (!valid) {
+            Toast.makeText(getApplicationContext(), "3-15 characters \nLetters, numbers, and . _ - only", Toast.LENGTH_SHORT).show();
         }
 
         return valid;

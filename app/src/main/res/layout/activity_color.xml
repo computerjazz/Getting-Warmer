@@ -97,6 +97,7 @@
             android:gravity="center_horizontal"
             android:textAllCaps="true"
             android:textSize="@dimen/abc_text_size_display_1_material"
+            android:fontFamily="sans-serif-light"
             android:layout_alignParentBottom="true"
             android:textColor="@color/white"/>
 
