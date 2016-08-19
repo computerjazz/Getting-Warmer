@@ -113,6 +113,7 @@ public class SignupActivity extends AppCompatActivity {
                                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                                 SharedPreferences.Editor editor = prefs.edit();
                                 editor.putString("username", user);
+                                editor.putBoolean("vibrate", true);
                                 editor.commit();
 
                                 Intent i = new Intent(SignupActivity.this, ColorActivity.class);

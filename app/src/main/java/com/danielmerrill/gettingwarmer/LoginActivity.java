@@ -94,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("username", user);
+                        editor.putBoolean("vibrate", true);
                         editor.commit();
                         //Toast.makeText(LoginActivity.this, prefs.getString("username", ""), Toast.LENGTH_SHORT).show();
                         Intent i = new Intent(LoginActivity.this, ColorActivity.class);

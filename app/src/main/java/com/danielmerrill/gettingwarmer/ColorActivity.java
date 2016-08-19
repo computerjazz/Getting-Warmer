@@ -21,11 +21,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -61,7 +64,7 @@ public class ColorActivity extends AppCompatActivity  {
     private TextView distanceDisplay;
     private TextView initialDisplay;
     private TextView friendUsernameTitle;
-    private TextView winMessage;
+    private ImageView winMessage;
 
     private RelativeLayout mainColorDisplay;
 
@@ -87,12 +90,15 @@ public class ColorActivity extends AppCompatActivity  {
     private double currentLatitude;
     private double currentLongitude;
 
+    private SharedPreferences prefs;
+    private PopupMenu popup;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         username = prefs.getString("username", "");
 
 
@@ -117,7 +123,7 @@ public class ColorActivity extends AppCompatActivity  {
         distanceDisplay = (TextView) findViewById(R.id.distance_display);
         initialDisplay = (TextView) findViewById(R.id.initial_display);
         friendUsernameTitle = (TextView) findViewById(R.id.users_title);
-        winMessage = (TextView) findViewById(R.id.win);
+        winMessage = (ImageView) findViewById(R.id.win);
 
         mainColorDisplay = (RelativeLayout) findViewById(R.id.main_color_display);
         ringView = (ImageView) findViewById(R.id.ringView);
@@ -203,6 +209,7 @@ public class ColorActivity extends AppCompatActivity  {
         super.onDestroy();
     }
 
+
     private void createAndStartTimer() {
         myTimer = new Timer();
         myTimer.schedule(new TimerTask() {
@@ -245,8 +252,13 @@ public class ColorActivity extends AppCompatActivity  {
 
     private boolean checkWinCondition() {
         if (currentDist < WIN_DISTANCE) {
-            vibrateOnFire();
+            if (prefs.getBoolean("vibrate", true)) {
+                vibrateOnFire();
+            }
+
             winMessage.setVisibility(View.VISIBLE);
+            Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake);
+            winMessage.startAnimation(shake);
             return true;
         } else {
             winMessage.setVisibility(View.INVISIBLE);
@@ -264,7 +276,7 @@ public class ColorActivity extends AppCompatActivity  {
         int long_gap = 1000;    // Length of Gap Between Words
         long[] pattern = {
                 0,  // Start immediately
-                dot, short_gap, dot, short_gap, dot    // s
+                dot    // s
 
         };
         v.vibrate(pattern, -1);
@@ -293,10 +305,19 @@ public class ColorActivity extends AppCompatActivity  {
         }
     };
 
+    private PopupMenu getPopup(View v) {
+        if (popup == null) {
+            popup = new PopupMenu(this, v);
+            MenuInflater inflater = popup.getMenuInflater();
+            inflater.inflate(R.menu.menu_homepage, popup.getMenu());
+            popup.getMenu().findItem(R.id.action_vibrate).setChecked(prefs.getBoolean("vibrate", true));
+
+        }
+        return popup;
+    }
+
     public void showPopup(View v) {
-        PopupMenu popup = new PopupMenu(this, v);
-        MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(R.menu.menu_homepage, popup.getMenu());
+        PopupMenu popup = getPopup(v);
         popup.show();
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -306,12 +327,33 @@ public class ColorActivity extends AppCompatActivity  {
                         logOut();
                         return true;
 
+                    case R.id.action_vibrate:
+
+                        boolean b = prefs.getBoolean("vibrate", true);
+                        b = !b;
+                        item.setChecked(!item.isChecked());
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("vibrate", b);
+                        editor.commit();
+                        return true;
+
                     default:
                         return false;
 
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem m = menu.findItem(R.id.action_vibrate);
+        if (prefs.getBoolean("vibarate", true)) {
+            m.setTitle("Disable vibrate");
+        } else {
+            m.setTitle("Enable vibrate");
+        }
+        return true;
     }
 
 

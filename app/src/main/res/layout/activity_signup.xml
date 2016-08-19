@@ -13,6 +13,11 @@
         android:paddingTop="56dp"
         android:paddingLeft="24dp"
         android:paddingRight="24dp">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:src="@drawable/gw_logo"
+            android:layout_marginBottom="20dp"/>
 
     <!--    <ImageView android:src=""
             android:layout_width="wrap_content"
@@ -29,11 +34,7 @@
             android:layout_marginBottom="8dp"
             android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:src="@drawable/gw_title"
-                android:layout_marginBottom="20dp"/>
+
 
             <EditText android:id="@+id/input_username"
                 android:layout_width="match_parent"
