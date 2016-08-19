@@ -49,6 +49,8 @@ public class ColorActivity extends AppCompatActivity  {
 
     private int TIMER_TICKS_BETWEEN_RING_DISPLAY = 10;
     private int TIME_BETWEEN_TIMER_TICKS = 1000;
+
+    // Meters away "On Fire" message displays
     private int WIN_DISTANCE = 5;
     private int MAX_COLOR_RANGE = 195;
     private int MIN_COLOR_VALUE = 60;
@@ -114,10 +116,6 @@ public class ColorActivity extends AppCompatActivity  {
             setFriendUsername(friendUsername);
         }
 
-
-
-
-
         mFriends = (ImageView) findViewById(R.id.friendsIcon);
         percentageDisplay = (TextView) findViewById(R.id.percentage_display);
         distanceDisplay = (TextView) findViewById(R.id.distance_display);
@@ -148,6 +146,7 @@ public class ColorActivity extends AppCompatActivity  {
             }
         });
 
+        // Set up hidden distance displays
         friendUsernameTitle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -238,6 +237,7 @@ public class ColorActivity extends AppCompatActivity  {
         }
     };
 
+
     private void triggerPeriodicUpdates() {
         if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
             if (isInGame) {
@@ -249,6 +249,7 @@ public class ColorActivity extends AppCompatActivity  {
             locationTickCounter = 0;
         }
     }
+
 
     private boolean checkWinCondition() {
         if (currentDist < WIN_DISTANCE) {
@@ -343,17 +344,6 @@ public class ColorActivity extends AppCompatActivity  {
                 }
             }
         });
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem m = menu.findItem(R.id.action_vibrate);
-        if (prefs.getBoolean("vibarate", true)) {
-            m.setTitle("Disable vibrate");
-        } else {
-            m.setTitle("Enable vibrate");
-        }
-        return true;
     }
 
 
