@@ -170,7 +170,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 builder.setCancelable(true);
                 builder.setIcon(R.drawable.ic_person_pin_circle_grey_24dp);
                 builder.setMessage("Sending your location will overwrite any past locations sent to " + friend);
-
                 builder.setPositiveButton(
                         "Find " + friend,
                         new DialogInterface.OnClickListener() {

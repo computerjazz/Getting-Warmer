@@ -459,7 +459,7 @@ public class ColorActivity extends AppCompatActivity  {
                             targetLatitude = Double.parseDouble(model.getLatitudeTarget());
                             targetLongitude = Double.parseDouble(model.getLongitudeTarget());
                             if (model.getIsNew().equals("1")) { // check if location is new
-                                Toast.makeText(getApplicationContext(), "New Pin Detected!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Loading New Location!", Toast.LENGTH_SHORT).show();
                                 initialLatitude = latitude;
                                 initialLongitude = longitude;
                                 setInitialLocation(friend, targetLatitude, targetLongitude, currentLatitude, currentLongitude);
