@@ -52,6 +52,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
     private ArrayList<String> friendsList;
     private ArrayList<String> requestsList;
+    private ArrayList<String> friendsWithNewLocations;
 
     private  int ANIMATION_DURATION = 200;
     private DrawerLayout mDrawerLayout;
@@ -76,7 +77,13 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         friendUserName_input = (EditText)v.findViewById(R.id.input_friendUsername);
 
         flv = (ListView) v.findViewById(R.id.friends_list);
+        flv.setDivider(null);
+        flv.setDividerHeight(0);
+
         rlv = (ListView) v.findViewById(R.id.requests_list);
+        rlv.setDivider(null);
+        rlv.setDividerHeight(0);
+
         friendListTitle = (TextView) v.findViewById(R.id.textview_friends);
         friendsListView = (NoScrollListView) v.findViewById(R.id.friends_list);
         closeDrawer = (ImageView) v.findViewById(R.id.closeDrawer);
@@ -87,11 +94,13 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
         friendsList = new ArrayList<>();
         requestsList = new ArrayList<>();
+        friendsWithNewLocations = new ArrayList<>();
         setRequestsList(new ArrayList<String>());
-        setFriendsList(new ArrayList<String>());
+        setFriendsList(new ArrayList<String>(), new ArrayList<String>());
 
         colorActivity = (ColorActivity) getActivity();
 
+        getFriendsWithNewLocation();
         refreshFriendsList();
         refreshRequestsList();
 
@@ -151,8 +160,8 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                final String friend = flv.getItemAtPosition(position).toString();
-
+                final Friend friendObj = (Friend) flv.getItemAtPosition(position);
+                final String friend = friendObj.name;
 
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -195,7 +204,8 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                                            int pos, long id) {
                 // get location info
                 // create class object
-                final String friend = flv.getItemAtPosition(pos).toString();
+                Friend friendObj = (Friend)flv.getItemAtPosition(pos);
+                final String friend =friendObj.name;
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle("UNFRIEND");
@@ -296,8 +306,10 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
     }
 
     public void refresh() {
+        getFriendsWithNewLocation();
         refreshFriendsList();
         refreshRequestsList();
+
     }
 
     //TODO
@@ -382,12 +394,6 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         });
     }
 
-    //TODO
-    private void checkForNewPins() {
-
-    }
-
-
 
     public void acceptFriend(String friendName) {
 
@@ -406,17 +412,12 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                     if (model.getStatus().equals("1")) {  //AddFriend Success
                         refreshFriendsList();
                         Toast.makeText(getActivity().getApplicationContext(), "Accepted friend request from " + friend, Toast.LENGTH_SHORT).show();
-                        
-
                     } else if (model.getStatus().equals("0")) { // Friend add failure
-
-
                         Toast.makeText(getActivity().getApplicationContext(), friend + " does not exist", Toast.LENGTH_SHORT).show();
                     } else if (model.getStatus().equals("3")) { // previous request from friend was already sent, so add friends
                         refreshFriendsList();
                         refreshRequestsList();
                         // hide keyboard
-
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         if (getActivity().getCurrentFocus() != null) {
                             imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
@@ -524,22 +525,28 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
         return usernameValidator.validate(s);
     }
 
-    private void setFriendsList(ArrayList<String> fl) {
-        if (getActivity() != null) {
+    private void setFriendsList(ArrayList<String> fl, ArrayList<String> friendsWithNewLocations) {
+        if (getActivity() == null) return;
 
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                    getActivity(),
-                    R.layout.custom_listitem,
-                    fl);
+        Friend friend_data[] = new Friend[fl.size()];
 
-            flv.setAdapter(arrayAdapter);
+        for (int i = 0; i < fl.size(); i++) {
+            friend_data[i] = new Friend(fl.get(i), friendsWithNewLocations);
         }
+
+
+        FriendAdapter friendAdapter = new FriendAdapter(
+                getActivity(),
+                R.layout.listview_item,
+                friend_data);
+
+        flv.setAdapter(friendAdapter);
+
 
     }
 
     private void setRequestsList(ArrayList<String> rl) {
         if (getActivity() != null) {
-
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                     getActivity(),
                     R.layout.custom_listitem,
@@ -578,7 +585,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                         ArrayList<String> friends = (ArrayList<String>) model.getFriends();
                         Collections.sort(friends, String.CASE_INSENSITIVE_ORDER);
                         if (!friends.equals(friendsList)) {
-                            setFriendsList(friends);
+                            setFriendsList(friends, friendsWithNewLocations);
                             friendsList = friends;
                         }
 
@@ -629,6 +636,52 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
 
             @Override
             public void failure(RetrofitError error) {
+                String merror = error.getMessage();
+                Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+    public void getFriendsWithNewLocation() {
+
+        RestAdapter adapter = new RestAdapter.Builder().setEndpoint(RestInterface.url).build();
+
+        //Creating Rest Services
+        final RestInterface restInterface = adapter.create(RestInterface.class);
+
+        //Calling method to get friends list
+        restInterface.getFriendsWithNewLocation(username, new Callback<LoginModel>() {
+
+            @Override
+            public void success(LoginModel model, Response response) {
+
+                if (model.getStatus().equals("1")) {  //get friends Success
+                    ArrayList<String> friends = (ArrayList<String>) model.getFriendsWithNewLocation();
+                    Collections.sort(friends, String.CASE_INSENSITIVE_ORDER);
+                    if (!friendsWithNewLocations.equals(friends)) {
+                        friendsWithNewLocations = friends;
+                        setFriendsList(friendsList, friendsWithNewLocations);
+                    }
+                    /*
+
+                    if (!friends.equals(friendsList)) {
+                        setFriendsList(friends);
+                        friendsList = friends;
+                    }
+                    */
+                   // Toast.makeText(getActivity(), friends.toString(), Toast.LENGTH_SHORT).show();
+
+
+                } else if (model.getStatus().equals("2")) { // database error
+
+                    Toast.makeText(getActivity().getApplicationContext(), "Couldn't refresh locations", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
                 String merror = error.getMessage();
                 Toast.makeText(getActivity().getApplicationContext(), merror, Toast.LENGTH_LONG).show();
             }

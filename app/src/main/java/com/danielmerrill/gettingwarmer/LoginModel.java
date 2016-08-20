@@ -40,6 +40,9 @@ public class LoginModel {
     @SerializedName("friends")
     @Expose
     private List<String> friends = new ArrayList<String>();
+    @SerializedName("friendsWithNewLocation")
+    @Expose
+    private List<String> friendsWithNewLocation = new ArrayList<String>();
     @SerializedName("requests")
     @Expose
     private List<String> requests = new ArrayList<String>();
@@ -175,11 +178,12 @@ public class LoginModel {
     /**
      *
      * @return
-     * The friends
+     * List of all friends
      */
     public List<String> getFriends() {
         return friends;
     }
+
 
     /**
      *
@@ -206,6 +210,24 @@ public class LoginModel {
      */
     public void setRequests(List<String> requests) {
         this.requests = requests;
+    }
+
+    /**
+     *
+     * @return
+     * List of friends who have a new location
+     */
+    public List<String> getFriendsWithNewLocation() {
+        return friendsWithNewLocation;
+    }
+
+    /**
+     *
+     * @param friendsWithNewLocation
+     * Friends with new location
+     */
+    public void setFriendsWithNewLocation(List<String> friendsWithNewLocation) {
+        this.friendsWithNewLocation = friendsWithNewLocation;
     }
 
 }

@@ -50,6 +50,11 @@ public interface RestInterface {
                     Callback<LoginModel> cb);
 
     @FormUrlEncoded
+    @POST("/getnew")
+    void getFriendsWithNewLocation(@Field("username") String username,
+                    Callback<LoginModel> cb);
+
+    @FormUrlEncoded
     @POST("/getrequests")
     void getRequests(@Field("username") String username,
                     Callback<LoginModel> cb);
