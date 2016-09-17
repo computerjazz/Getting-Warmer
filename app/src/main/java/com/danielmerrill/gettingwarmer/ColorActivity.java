@@ -242,7 +242,6 @@ public class ColorActivity extends AppCompatActivity  {
         if (++locationTickCounter >= TIMER_TICKS_BETWEEN_RING_DISPLAY) {
             if (isInGame) {
                 checkIfCloserAndDisplayRing();
-
             }
 
             refreshFriendsLists();
@@ -295,6 +294,8 @@ public class ColorActivity extends AppCompatActivity  {
     private void refreshFriendsLists() {
         if (actionsFragment != null) {
             actionsFragment.refresh();
+        } else {
+            //Toast.makeText(getApplicationContext(), "Null Fragment", Toast.LENGTH_SHORT).show();
         }
     }
 

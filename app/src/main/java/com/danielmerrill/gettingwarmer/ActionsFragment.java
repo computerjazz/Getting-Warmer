@@ -171,7 +171,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                 builder.setIcon(R.drawable.ic_person_pin_circle_grey_24dp);
                 builder.setMessage("Sending your location will overwrite any past locations sent to " + friend);
                 builder.setPositiveButton(
-                        "Find " + friend,
+                        "Find",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 colorActivity.reset();
@@ -182,7 +182,7 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                         });
 
                 builder.setNegativeButton(
-                        "Send Your Location",
+                        "Send",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 sendLocation(friend);
@@ -662,14 +662,8 @@ public class ActionsFragment extends android.support.v4.app.Fragment {
                         friendsWithNewLocations = friends;
                         setFriendsList(friendsList, friendsWithNewLocations);
                     }
-                    /*
 
-                    if (!friends.equals(friendsList)) {
-                        setFriendsList(friends);
-                        friendsList = friends;
-                    }
-                    */
-                   // Toast.makeText(getActivity(), friends.toString(), Toast.LENGTH_SHORT).show();
+                   //Toast.makeText(getActivity(), friends.toString(), Toast.LENGTH_SHORT).show();
 
 
                 } else if (model.getStatus().equals("2")) { // database error
