@@ -1,4 +1,6 @@
-# Getting-Warmer
+# Getting Warmer
+Find your friends using only colors to guide you!
+
 Getting Warmer expands on the classic game of hiding something while a friend "gets warmer" or "gets colder" as they search for it.
 Your phone's screen changes color as you move around to let you know how close you are to the target—your screen appears blue at first, then transitions to red as you get closer. Color animations let you know if you're on the right track.
 
